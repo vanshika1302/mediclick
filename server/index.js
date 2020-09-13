@@ -28,6 +28,9 @@ app.use(cors());
 const patientRoute = require('./routes/patient.route');
 app.use('/patient', patientRoute);
 
+const doctorRoute = require('./routes/doctor.route');
+app.use('/doctor', doctorRoute);
+
 // 404 Error
 app.use((req, res, next) => {
   next(createError(404));
