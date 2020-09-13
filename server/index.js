@@ -1,34 +1,35 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const dbConfig = require('./database/db');
+import express from 'express';
+import mongoose from 'mongoose';
+const {connect} = mongoose;
+import cors from 'cors';
+import BodyParser from 'body-parser';
+const {json, urlencoded} = BodyParser;
 const port = process.env.PORT || 4000;
+const mongoURL = 'mongodb://localhost:27017/mediclick';
 
 // Connecting mongoDB Database
-mongoose.Promise = global.Promise;
-mongoose.connect(dbConfig.db, {
+connect(mongoURL, {
   useNewUrlParser: true
 }).then(() => {
   console.log('Database successfully connected!');
 },
   error => {
-    console.log('Could not connect to database : ' + error);
+    console.log('Could not connect to database: ' + error);
   }
 )
 
 const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
+app.use(json());
+app.use(urlencoded({
   extended: true
 }));
 app.use(cors());
 
 // Routes
-const patientRoute = require('./routes/patient.route');
+import patientRoute from './routes/patient.route.js';
 app.use('/patient', patientRoute);
 
-const doctorRoute = require('./routes/doctor.route');
+import doctorRoute from './routes/doctor.route.js';
 app.use('/doctor', doctorRoute);
 
 // 404 Error

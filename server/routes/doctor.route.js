@@ -1,8 +1,6 @@
-const mongoose = require('mongoose'),
-express = require('express'),
-router = express.Router();
+import express from 'express';
+import Doctor from '../models/doctor.js';
 
-// Patient Model
-const patientSchema = require('../models/doctor');
+const router = express.Router();
 
-module.exports = router;
+export default router;

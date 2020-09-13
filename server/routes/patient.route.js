@@ -1,13 +1,10 @@
-const mongoose = require('mongoose'),
-express = require('express'),
-router = express.Router();
-
-// Patient Model
-const patientSchema = require('../models/patient');
+import express from 'express';
+import Patient from '../models/patient.js';
+const router = express.Router();
 
 // REGISTER Patient
 router.put('/register', (req, res, next) => {
-  patientSchema.create(req.body, (error, data) => {
+  Patient.create(req.body, (error, data) => {
     if (error) {
       return next(error);
     } else {
@@ -19,7 +16,7 @@ router.put('/register', (req, res, next) => {
 
 // READ Students
 router.get('/read', (req, res) => {
-  patientSchema.find((error, data) => {
+  Patient.find((error, data) => {
     if (error) {
       return next(error);
     } else {
@@ -30,7 +27,7 @@ router.get('/read', (req, res) => {
 
 // EDIT Patient
 router.post('/edit', (req, res, next) => {
-  patientSchema.findByIdAndUpdate(req.params.id, {
+  Patient.findByIdAndUpdate(req.params.id, {
     $set: req.body
   }, (error, data) => {
     if (error) {
@@ -43,7 +40,7 @@ router.post('/edit', (req, res, next) => {
 
 // DELETE Patient
 router.delete('/delete', (req, res, next) => {
-  patientSchema.findByIdAndRemove(req.params.id, (error, data) => {
+  Patient.findByIdAndRemove(req.params.id, (error, data) => {
     if (error) {
       return next(error);
     } else {
@@ -54,4 +51,4 @@ router.delete('/delete', (req, res, next) => {
   })
 })
 
-module.exports = router;
+export default router;
