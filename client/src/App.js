@@ -1,17 +1,14 @@
 import React from 'react';
-import './App.css';
-import{BrowserRouter as Router, Switch, Route} from 'react-router-dom';
-import PatientHome from './components/patient/Home';
-import DoctorHome from './components/doctor/Home';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
-    <div className="App">
+    <div>
       <Router>
         <Switch>
-        <Route path='/patient'  component= {PatientHome} />
-        <Route path='/doctor' component={DoctorHome} />   
-         
+          <Route path='/patient' render={props => <Dashboard {...props} userType="patient"/>} />
+          <Route path='/doctor' render={props => <Dashboard {...props} userType="doctor" />} />
         </Switch>
       </Router>
     </div>
