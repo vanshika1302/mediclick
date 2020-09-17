@@ -15,6 +15,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
+import ViewAppointments from './ViewAppointments';
 
 const drawerWidth = 240;
 
@@ -86,7 +87,7 @@ export default function Dashboard(props) {
 
   const MENU_ITEMS = [
     {id: 'book_appointment', label: 'New Appointment', patient: true, doctor: false},
-    {id: 'view_appointments', label: 'Existing Appointments', patient: true, doctor: true}
+    {id: 'view_appointments', label: 'View Appointments', patient: true, doctor: true}
   ];
 
   const [open, setOpen] = useState(false);
@@ -152,7 +153,12 @@ export default function Dashboard(props) {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <NewAppointment />
+        {
+          {
+            book_appointment: <NewAppointment />,
+            view_appointments: <ViewAppointments />
+          }[selectedMenu]
+        }
       </main>
     </div>
   );

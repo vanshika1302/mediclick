@@ -11,14 +11,6 @@ const useStyles = makeStyles({
   root: {
     minWidth: 275,
   },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
   pos: {
     marginBottom: 12,
   },
@@ -35,7 +27,7 @@ const SPECIALTIES = [
   {id: 'spcl2', name: 'SPCL2'}
 ]
 
-function SelectSpecialty(props) {
+function SpecialtyForm(props) {
   return <Grid item container alignItems="center" justify="center">
     <Grid item xs={5}>
       <TextField
@@ -59,7 +51,7 @@ const DOCTORS = [
   {id: 'doc2', name: 'Dr. Archil Srivastava', hospital: 'Ghar pe hi ilaaj karte hai'}
 ]
 
-function DoctorSelect(props) {
+function DoctorForm(props) {
   const classes  = useStyles();
   return <Grid item container direction="column" spacing={3}>
     {
@@ -132,12 +124,25 @@ function Confirmation() {
 
 export default function NewAppointment() {
   const [step, setStep] = useState(0);
-  const [specialty, setSpecialty] = useState(undefined);
+  const [specialty, setSpecialty] = useState('');
   const [doctor, setDoctor] = useState(undefined);
   const [symptoms, setSymptoms] = useState(undefined);
   const [slot, setSlot] = useState(undefined);
 
+  const stepDetails = [
+    {component: SpecialtyForm, params: {value: specialty, onChange: setSpecialty}},
+    {component: DoctorForm, params: {value: doctor, onChange: setDoctor}},
+    {component: SymptomsForm, params: {value: symptoms, onChange: setSymptoms}},
+    {component: SlotForm, params: {value: slot, onChange: setSlot}},
+    {component: Confirmation, params: {}}
+  ];
+
   const handleNext = () => {
+    if (stepDetails[step].params.value === null ||
+      stepDetails[step].params.value === undefined ||
+      stepDetails[step].params.value === '') {
+      return;
+    }
     setStep(step + 1);
   };
   const handleBack = () => {
@@ -158,22 +163,26 @@ export default function NewAppointment() {
                 })}
               </Breadcrumbs>
             </Grid>
-            {
-              [
-                <SelectSpecialty value={specialty} onChange={setSpecialty}/>,
-                <DoctorSelect value={doctor} onChange={setDoctor}/>,
-                <SymptomsForm value={symptoms} onChange={setSymptoms}/>,
-                <SlotForm value={slot} onChange={setSlot}/>,
-                <Confirmation />
-              ][step]
-            }
+            {stepDetails.map(item => <item.component {...item.params} />)[step]}
             {step < 4 ?
               <Grid item container justify="center" spacing={10}>
                 <Grid item>
-                  <Button disabled={step===0} variant="contained" color="secondary" onClick={handleBack}>Back</Button>
+                  <Button
+                    disabled={step===0}
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleBack}>
+                    Back
+                  </Button>
                 </Grid>
                 <Grid item>
-                  <Button variant="contained" color="primary" onClick={handleNext}>Next</Button>
+                  <Button
+                    disabled={[undefined, null, ''].includes(stepDetails[step].params.value)}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleNext}>
+                    Next
+                  </Button>
                 </Grid>
               </Grid>
               : null
