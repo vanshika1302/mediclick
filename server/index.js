@@ -32,9 +32,13 @@ app.use('/patient', patientRoute);
 import doctorRoute from './routes/doctor.route.js';
 app.use('/doctor', doctorRoute);
 
+import appointmentRoute from './routes/appointment.route.js';
+app.use('/appointment', appointmentRoute);
+
 // 404 Error
 app.use((req, res, next) => {
-  next(createError(404));
+  //console.log(req.body);
+  //next(createError(404));
 });
 
 app.use(function (err, req, res, next) {
@@ -46,4 +50,4 @@ app.use(function (err, req, res, next) {
 // Listen app
 const server = app.listen(port, () => {
   console.log('Started server on port ' + port);
-})
+});

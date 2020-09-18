@@ -36,8 +36,8 @@ function SpecialtyForm(props) {
         fullWidth
         required
         id="select"
-        name="Select Speciality"
-        label="Select Speciality"
+        name="Select Specialty"
+        label="Select Specialty"
         select
       >
         {SPECIALTIES.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}

@@ -2,7 +2,7 @@ import Mongoose from 'mongoose';
 const {Schema, model} = Mongoose;
 
 const hospitalSchema  = new Schema({
-  code: {
+  id: {
     type: String,
     unique: true,
     required: true
@@ -19,11 +19,11 @@ const hospitalSchema  = new Schema({
     type: String,
     required: true
   }
-});
+}, {collection: 'hospital'});
 const Hospital = model('Hospital', hospitalSchema);
 
-const specialitySchema = new Schema({
-  code: {
+const specialtySchema = new Schema({
+  id: {
       type: String,
       unique: true,
       required: true
@@ -32,8 +32,8 @@ const specialitySchema = new Schema({
       type: String,
       required: true
   }
-});
-const Speciality = model('Speciality', specialitySchema);
+}, {collection: 'specialty'});
+const Specialty = model('Specialty', specialtySchema);
 
 const availabilitySchema = new Schema({
   days: {
@@ -63,25 +63,39 @@ const doctorSchema = new Schema({
   lastName: {
     type: String
   },
-  speciality: {
-    type: Schema.Types.ObjectId,
-    ref: 'Speciality',
-    required: true
-  },
-  hospital: {
-    type: Schema.Types.ObjectId,
-    ref: Hospital,
-    required: true
-  },
   phone: {
     type: String
   },
   availability: {
     type: availabilitySchema,
     required: true
+  },
+  hospitalId: {
+    type: "String",
+    required: true
+  },
+  specialtyId: {
+    type: String,
+    required: true
   }
 }, {
+    toObject: {virtuals: true},
+    toJSON: {virtuals: true},
     collection: 'doctor'
+});
+
+doctorSchema.virtual('specialty', {
+  ref: 'Specialty',
+  localField: 'specialtyId',
+  foreignField: 'id',
+  justOne: true
+});
+
+doctorSchema.virtual('hospital', {
+  ref: 'Hospital',
+  localField: 'hospitalId',
+  foreignField: 'id',
+  justOne: true
 });
 
 export default model('Doctor', doctorSchema);

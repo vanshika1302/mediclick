@@ -11,10 +11,10 @@ router.put('/register', (req, res, next) => {
       console.log(data);
       res.json(data);
     }
-  })
+  });
 });
 
-// READ Students
+// READ Patients
 router.get('/read', (req, res) => {
   Patient.find((error, data) => {
     if (error) {
@@ -22,25 +22,23 @@ router.get('/read', (req, res) => {
     } else {
       res.json(data);
     }
-  })
-})
+  });
+});
 
 // EDIT Patient
 router.post('/edit', (req, res, next) => {
-  Patient.findByIdAndUpdate(req.params.id, {
-    $set: req.body
-  }, (error, data) => {
+  Patient.updateOne({email: req.body.email}, req.body, (error, data) => {
     if (error) {
       return next(error);
     } else {
       res.json(data);
     }
-  })
-})
+  });
+});
 
 // DELETE Patient
 router.delete('/delete', (req, res, next) => {
-  Patient.findByIdAndRemove(req.params.id, (error, data) => {
+  Patient.deleteOne(req.body, (error, data) => {
     if (error) {
       return next(error);
     } else {
@@ -48,7 +46,7 @@ router.delete('/delete', (req, res, next) => {
         msg: data
       });
     }
-  })
-})
+  });
+});
 
 export default router;
