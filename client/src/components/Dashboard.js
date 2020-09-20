@@ -95,7 +95,7 @@ export default function Dashboard(props) {
     setOpen(!open);
   };
 
-  const [selectedMenu, setSelectedMenu] = useState(props.userType === 'patient' ? 'book_appointment' : 'view_appointments');
+  const [selectedMenu, setSelectedMenu] = useState(props.user.type === 'patient' ? 'book_appointment' : 'view_appointments');
 
   return (
     <div className={classes.root}>
@@ -118,7 +118,7 @@ export default function Dashboard(props) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            Welcome {props.userType}
+            Welcome {props.user.firstName} {props.user.lastName}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -142,7 +142,7 @@ export default function Dashboard(props) {
         </div>
         <Divider />
         <List>
-          {MENU_ITEMS.filter(item => item[props.userType]).map(item => (
+          {MENU_ITEMS.filter(item => item[props.user.type]).map(item => (
             <ListItem button key={item.id} onClick={() => setSelectedMenu(item.id)}>
               <ListItemIcon><InboxIcon /></ListItemIcon>
               <ListItemText primary={item.label} />
@@ -155,8 +155,8 @@ export default function Dashboard(props) {
         <div className={classes.toolbar} />
         {
           {
-            book_appointment: <NewAppointment />,
-            view_appointments: <ViewAppointments />
+            book_appointment: <NewAppointment user={props.user} />,
+            view_appointments: <ViewAppointments user={props.user} />
           }[selectedMenu]
         }
       </main>

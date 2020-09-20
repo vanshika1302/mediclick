@@ -17,6 +17,10 @@ const appointmentSchema = new Schema({
   patientEmail: {
     type: String,
     required: true
+  },
+  status: {
+    type: String,
+    required: true
   }
 }, {
   toObject: {virtuals: true},

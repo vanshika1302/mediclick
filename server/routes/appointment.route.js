@@ -16,7 +16,9 @@ router.put('/create', (req, res, next) => {
 
 // GET appointments
 router.get('/read', (req, res) => {
-  Appointment.find(req.body).populate('doctor').populate('patient')
+  Appointment.find(req.body)
+  .populate({path: 'doctor', populate: {path: 'hospital'}})
+  .populate('patient')
   .then(data => res.json(data), error => next(error));
 });
 

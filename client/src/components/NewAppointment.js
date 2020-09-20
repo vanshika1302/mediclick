@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { uniq } from 'underscore';
+import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -21,12 +23,6 @@ const useStyles = makeStyles({
   }
 });
 
-
-const SPECIALTIES = [
-  {id: 'spcl1', name: 'SPCL1'},
-  {id: 'spcl2', name: 'SPCL2'}
-]
-
 function SpecialtyForm(props) {
   return <Grid item container alignItems="center" justify="center">
     <Grid item xs={5}>
@@ -40,34 +36,29 @@ function SpecialtyForm(props) {
         label="Select Specialty"
         select
       >
-        {SPECIALTIES.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+        {props.allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
       </TextField>
     </Grid>
   </Grid>;
 }
 
-const DOCTORS = [
-  {id: 'doc1', name: 'Dr. Vanshika Srivastava', hospital: 'Pagalkhana, Rajajipuram'},
-  {id: 'doc2', name: 'Dr. Archil Srivastava', hospital: 'Ghar pe hi ilaaj karte hai'}
-]
-
 function DoctorForm(props) {
   const classes  = useStyles();
   return <Grid item container direction="column" spacing={3}>
     {
-      DOCTORS.map(doctor => (
-        <Grid item key={doctor.id}>
+      props.allDoctors.map(doctor => (
+        <Grid item key={doctor.email}>
           <Card className={classes.card} variant="outlined">
             <CardContent>
               <Typography variant="h5" component="h2">
-                {doctor.name}
+                {doctor.firstName} {doctor.lastName}
               </Typography>
               <Typography className={classes.pos} color="textSecondary">
-                {doctor.hospital}
+                {doctor.hospital.name}
               </Typography>
             </CardContent>
             <CardActions>
-              <Radio size="medium" checked={doctor.id === props.value} onChange={() => props.onChange(doctor.id)}/>
+              <Radio size="medium" checked={doctor.email === props.value} onChange={() => props.onChange(doctor.email)}/>
             </CardActions>
           </Card>
         </Grid>
@@ -122,72 +113,148 @@ function Confirmation() {
   </Grid>
 }
 
-export default function NewAppointment() {
-  const [step, setStep] = useState(0);
-  const [specialty, setSpecialty] = useState('');
-  const [doctor, setDoctor] = useState(undefined);
-  const [symptoms, setSymptoms] = useState(undefined);
-  const [slot, setSlot] = useState(undefined);
+export default class NewAppointment extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      step: 0,
+      specialty: '',
+      doctor: undefined,
+      symptoms: undefined,
+      slotDate: undefined,
+      slotTime: undefined,
+      allDoctors: []
+    };
+  }
 
-  const stepDetails = [
-    {component: SpecialtyForm, params: {value: specialty, onChange: setSpecialty}},
-    {component: DoctorForm, params: {value: doctor, onChange: setDoctor}},
-    {component: SymptomsForm, params: {value: symptoms, onChange: setSymptoms}},
-    {component: SlotForm, params: {value: slot, onChange: setSlot}},
-    {component: Confirmation, params: {}}
-  ];
+  componentDidMount() {
+    axios.get('/doctor/read').then((response) => {
+      console.log(response.data);
+      this.setState({allDoctors: response.data});
+    }, (error) => {
+      console.log(error);
+    });
+  }
 
-  const handleNext = () => {
+  setSpecialty = (value) => this.setState({specialty: value});
+  setDoctor = (value) => this.setState({doctor: value});
+  setSymptoms = (value) => this.setState({symptoms: value});
+  setSlot = (value) => {
+    const s = value.split('T');
+    this.setState({slotDate: s[0], slotTime: s[1]});
+  };
+
+  handleNext = (stepDetails) => {
+    const step = this.state.step;
     if (stepDetails[step].params.value === null ||
       stepDetails[step].params.value === undefined ||
       stepDetails[step].params.value === '') {
       return;
     }
-    setStep(step + 1);
+    if (this.state.step == 3) {
+      const booking = {
+        date: this.state.slotDate,
+        time: this.state.slotTime,
+        doctorEmail: this.state.doctor,
+        patientEmail: this.props.user.email,
+        status: 'active'
+      };
+      axios.put('/appointment/create', booking).then((response) => {
+        console.log(response.data);
+        this.setState({step: this.state.step + 1});
+      }, (error) => {
+        console.log(error);
+      });
+    }
+    else {
+      this.setState({step: this.state.step + 1});
+    }
   };
-  const handleBack = () => {
-    setStep(step - 1);
+  handleBack = () => {
+    this.setState({step: this.state.step - 1});
   };
 
-  return <Paper elevation={4}>
-          <Grid container direction="column" justify="center" alignItems="center" spacing={4}>
+  render() {
+    const { step, specialty, doctor, symptoms, slotDate, slotTime, allDoctors } = this.state;
+    const stepDetails = [
+      {
+        component: SpecialtyForm,
+        params: {
+          allSpecialties: uniq(allDoctors.map(item => item.specialty), false, item => item.id),
+          value: specialty,
+          onChange: this.setSpecialty
+        }
+      },
+      {
+        component: DoctorForm,
+        params: {
+          allDoctors: allDoctors.filter(item => item.specialty.id == specialty),
+          value: doctor,
+          onChange: this.setDoctor
+        }
+      },
+      {
+        component: SymptomsForm,
+        params: {
+          value: symptoms,
+          onChange: this.setSymptoms
+        }
+      },
+      {
+        component: SlotForm,
+        params: {
+          value: slotDate + 'T' + slotTime,
+          onChange: this.setSlot
+        }
+      },
+      {
+        component: Confirmation,
+        params: {
+        }
+      }
+    ];
+
+    return <Paper elevation={4}>
+      <Grid container direction="column" justify="center" alignItems="center" spacing={4}>
+        <Grid item>
+          <Typography variant="h4">
+            New Appointment
+          </Typography>
+        </Grid>
+        <Grid item>
+          <Breadcrumbs separator="">
+            {[1, 2, 3, 4].map(item => {
+              return item <= step ? <CheckCircleIcon key={item} /> : <RadioButtonUncheckedIcon key={item} />
+            })}
+          </Breadcrumbs>
+        </Grid>
+        {stepDetails.map(item => <item.component {...item.params} />)[step]}
+        {step < 4 ?
+          <Grid item container justify="center" spacing={10}>
             <Grid item>
-              <Typography variant="h4">
-                New Appointment
-              </Typography>
+              <Button
+                disabled={step===0}
+                variant="contained"
+                color="secondary"
+                onClick={this.handleBack}>
+                Back
+              </Button>
             </Grid>
             <Grid item>
-              <Breadcrumbs separator="">
-                {[1, 2, 3, 4].map(item => {
-                  return item <= step ? <CheckCircleIcon key={item} /> : <RadioButtonUncheckedIcon key={item} />
-                })}
-              </Breadcrumbs>
+              <Button
+                disabled={[undefined, null, ''].includes(stepDetails[step].params.value)}
+                variant="contained"
+                color="primary"
+                onClick={() => this.handleNext(stepDetails)}
+              >
+                {step < 3 ? 'Next' : 'Book'}
+              </Button>
             </Grid>
-            {stepDetails.map(item => <item.component {...item.params} />)[step]}
-            {step < 4 ?
-              <Grid item container justify="center" spacing={10}>
-                <Grid item>
-                  <Button
-                    disabled={step===0}
-                    variant="contained"
-                    color="secondary"
-                    onClick={handleBack}>
-                    Back
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button
-                    disabled={[undefined, null, ''].includes(stepDetails[step].params.value)}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}>
-                    Next
-                  </Button>
-                </Grid>
-              </Grid>
-              : null
-            }
           </Grid>
-        </Paper>;
-}
+          : null
+        }
+      </Grid>
+    </Paper>;
+  }
+};
   
