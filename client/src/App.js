@@ -1,31 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import SignUp from './components/Signup';
+import { AuthContext, useAuth } from './auth';
 
-const PATIENT = {
-  email: 'archil.kumar@gmail.com',
-  firstName: 'Archil',
-  lastName: 'Srivastava',
-  age: 24,
-  city: 'Lucknow'
-};
-
-const DOCTOR = {
-  email: 'vanshika.mithi@gmail.com',
-  firstName: 'Vanshika',
-  lastName: 'Srivastava'
-};
+const PrivateRoute = ({ component: Component, ...rest }) => {
+  const { authTokens } = useAuth();
+  return(
+    <Route
+      {...rest}
+      render={(props) => (
+        authTokens && authTokens.success ?
+          (<Component {...{...props, ...{user: {...authTokens, type: authTokens.userType}}}} />) :
+          (<Redirect to="/login" />)
+      )}
+    />
+  );
+}
 
 function App() {
+  const existingTokens = JSON.parse(localStorage.getItem("tokens"));
+  const [authTokens, setAuthTokens] = useState(existingTokens);
+  
+  const setTokens = (data) => {
+    localStorage.setItem("tokens", JSON.stringify(data));
+    setAuthTokens(data);
+  };
   return (
-    <div>
+    <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
       <Router>
         <Switch>
-          <Route path='/patient' render={props => <Dashboard {...{...props, user: {...PATIENT, type: 'patient'}}} />} />
-          <Route path='/doctor' render={props => <Dashboard {...{...props, user: {...DOCTOR, type: 'doctor'}}} />} />
+          <Route path='/login' exact component={Login} />
+          <PrivateRoute path='/' exact component={Dashboard} />
         </Switch>
       </Router>
-    </div>
+    </AuthContext.Provider>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { uniq } from 'underscore';
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
@@ -36,7 +36,7 @@ function SpecialtyForm(props) {
         label="Select Specialty"
         select
       >
-        {props.allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+        {props.allSpecialties.map(item => <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>)}
       </TextField>
     </Grid>
   </Grid>;
@@ -55,6 +55,9 @@ function DoctorForm(props) {
               </Typography>
               <Typography className={classes.pos} color="textSecondary">
                 {doctor.hospital.name}
+              </Typography>
+              <Typography>
+                {doctor.hospital.address}
               </Typography>
             </CardContent>
             <CardActions>
@@ -151,7 +154,7 @@ export default class NewAppointment extends React.Component {
       stepDetails[step].params.value === '') {
       return;
     }
-    if (this.state.step == 3) {
+    if (this.state.step === 3) {
       const booking = {
         date: this.state.slotDate,
         time: this.state.slotTime,
@@ -180,7 +183,7 @@ export default class NewAppointment extends React.Component {
       {
         component: SpecialtyForm,
         params: {
-          allSpecialties: uniq(allDoctors.map(item => item.specialty), false, item => item.id),
+          allSpecialties: uniq(allDoctors.map(item => item.specialty), false, item => item._id),
           value: specialty,
           onChange: this.setSpecialty
         }
@@ -188,7 +191,7 @@ export default class NewAppointment extends React.Component {
       {
         component: DoctorForm,
         params: {
-          allDoctors: allDoctors.filter(item => item.specialty.id == specialty),
+          allDoctors: allDoctors.filter(item => item.specialty._id === specialty),
           value: doctor,
           onChange: this.setDoctor
         }

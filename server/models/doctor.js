@@ -2,11 +2,6 @@ import Mongoose from 'mongoose';
 const {Schema, model} = Mongoose;
 
 const hospitalSchema  = new Schema({
-  id: {
-    type: String,
-    unique: true,
-    required: true
-  },
   name: {
     type: String,
     required: true
@@ -23,11 +18,6 @@ const hospitalSchema  = new Schema({
 const Hospital = model('Hospital', hospitalSchema);
 
 const specialtySchema = new Schema({
-  id: {
-      type: String,
-      unique: true,
-      required: true
-  },
   name: {
       type: String,
       required: true
@@ -72,7 +62,7 @@ const doctorSchema = new Schema({
   },
   availability: {
     type: availabilitySchema,
-    required: true
+    required: false
   },
   hospitalId: {
     type: "String",

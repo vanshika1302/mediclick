@@ -18,7 +18,7 @@ router.put('/register', (req, res, next) => {
 // READ Doctors
 router.get('/read', (req, res) => {
   Doctor.find().populate('hospital').populate('specialty')
-  .then(data => res.json(data), error => next(error));
+  .then(data => res.json(data), error => console.log(error));
 });
 
 // EDIT Doctor

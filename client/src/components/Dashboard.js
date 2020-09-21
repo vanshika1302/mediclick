@@ -16,6 +16,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import ViewAppointments from './ViewAppointments';
+import { useAuth } from '../auth';
+import { Button } from '@material-ui/core';
 
 const drawerWidth = 240;
 
@@ -84,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Dashboard(props) {
   const classes = useStyles();
   const theme = useTheme();
+  const {setAuthTokens} = useAuth();
 
   const MENU_ITEMS = [
     {id: 'book_appointment', label: 'New Appointment', patient: true, doctor: false},
@@ -93,6 +96,10 @@ export default function Dashboard(props) {
   const [open, setOpen] = useState(false);
   const toggleDrawer = () => {
     setOpen(!open);
+  };
+
+  const handleLogout = () => {
+    setAuthTokens({});
   };
 
   const [selectedMenu, setSelectedMenu] = useState(props.user.type === 'patient' ? 'book_appointment' : 'view_appointments');
@@ -120,6 +127,9 @@ export default function Dashboard(props) {
           <Typography variant="h6" noWrap>
             Welcome {props.user.firstName} {props.user.lastName}
           </Typography>
+          <Button variant="outlined" onClick={handleLogout}>
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer

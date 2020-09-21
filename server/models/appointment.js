@@ -28,6 +28,10 @@ const appointmentSchema = new Schema({
   collection: 'appointment'
 });
 
+appointmentSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
 appointmentSchema.virtual('doctor', {
   ref: 'Doctor',
   localField: 'doctorEmail',

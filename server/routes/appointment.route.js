@@ -22,6 +22,17 @@ router.get('/read', (req, res) => {
   .then(data => res.json(data), error => next(error));
 });
 
+// EDIT appointment
+router.post('/edit', (req, res, next) => {
+  Appointment.updateOne({_id: req.body._id}, req.body, (error, data) => {
+    if (error) {
+      return next(error);
+    } else {
+      res.json(data);
+    }
+  });
+});
+
 // DELETE appointment
 router.delete('/delete', (req, res, next) => {
   Appointment.deleteOne(req.body, (error, data) => {
