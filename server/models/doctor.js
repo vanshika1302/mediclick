@@ -15,7 +15,7 @@ const hospitalSchema  = new Schema({
     required: true
   }
 }, {collection: 'hospital'});
-const Hospital = model('Hospital', hospitalSchema);
+export const Hospital = model('Hospital', hospitalSchema);
 
 const specialtySchema = new Schema({
   name: {
@@ -23,7 +23,7 @@ const specialtySchema = new Schema({
       required: true
   }
 }, {collection: 'specialty'});
-const Specialty = model('Specialty', specialtySchema);
+export const Specialty = model('Specialty', specialtySchema);
 
 const availabilitySchema = new Schema({
   days: {

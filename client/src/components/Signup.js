@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,23 +11,11 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { MenuItem, Tab, Tabs } from '@material-ui/core';
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   paper: {
     marginTop: theme.spacing(8),
     display: 'flex',
@@ -37,20 +26,43 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
-}));
+});
 
-export default function SignUp() {
-  const classes = useStyles();
+class SignUp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      userType: 'patient',
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      age: 18,
+      phone: '',
+      city: '',
+      hospital: '',
+      specialty: '',
+      allHospitals: [],
+      allSpecialties: []
+    }
+  }
 
-  return (
-    <Container component="main" maxWidth="xs">
+  componentDidMount() {
+    axios.get('/hospital/read')
+    .then((response) => this.setState({allHospitals: response.data}), (error) => console.log(error));
+
+    axios.get('/specialty/read')
+    .then((response) => this.setState({allSpecialties: response.data}), (error) => console.log(error));
+  }
+
+  render() {
+    const {userType, firstName, lastName, email, password, age, phone, city, hospital, specialty,
+      allHospitals, allSpecialties} = this.state;
+    const {classes} = this.props;
+    return (<Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
@@ -59,14 +71,25 @@ export default function SignUp() {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
+        <Tabs
+          value={userType}
+          indicatorColor="primary"
+          textColor="primary"
+          onChange={(event, value) => this.setState({userType: value})}
+        >
+          <Tab value="patient" label="Patient" />
+          <Tab value="doctor" label="Doctor" />
+        </Tabs>
+        <br />
+        <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 autoComplete="fname"
                 name="firstName"
                 variant="outlined"
                 required
+                value={firstName}
+                onChange={event => this.setState({firstName: event.target.value})}
                 fullWidth
                 id="firstName"
                 label="First Name"
@@ -77,6 +100,8 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 required
+                value={lastName}
+                onChange={event => this.setState({lastName: event.target.value})}
                 fullWidth
                 id="lastName"
                 label="Last Name"
@@ -88,6 +113,8 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 required
+                value={email}
+                onChange={event => this.setState({email: event.target.value})}
                 fullWidth
                 id="email"
                 label="Email Address"
@@ -99,6 +126,8 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 required
+                value={password}
+                onChange={event => this.setState({password: event.target.value})}
                 fullWidth
                 name="password"
                 label="Password"
@@ -107,20 +136,79 @@ export default function SignUp() {
                 autoComplete="current-password"
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
-            </Grid>
+            {userType === 'patient' ? <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    value={age}
+                    onChange={event => this.setState({age: event.target.value})}
+                    select
+                    fullWidth
+                    name="age"
+                    label="Age"
+                    id="age"
+                  >
+                    {[...Array(101).keys()].slice(1).map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    required value={phone}
+                    onChange={event => this.setState({phone: event.target.value})}
+                    fullWidth
+                    name="phone"
+                    label="Phone"
+                    id="phone"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    value={city}
+                    onChange={event => this.setState({city: event.target.value})}
+                    fullWidth
+                    name="city"
+                    label="City"
+                    id="city"
+                  />
+                </Grid>
+              </> : <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    value={hospital}
+                    onChange={event => this.setState({hospital: event.target.value})}
+                    select
+                    fullWidth
+                    name="hospital"
+                    label="Hospital"
+                    id="hospital"
+                  >
+                    {allHospitals.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    variant="outlined"
+                    required
+                    value={specialty}
+                    onChange={event => this.setState({specialty: event.target.value})}
+                    select
+                    fullWidth
+                    name="specialty"
+                    label="Specialty"
+                    id="specialty"
+                  >
+                    {allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+                  </TextField>
+                </Grid>
+              </>}
           </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
+          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
             Sign Up
           </Button>
           <Grid container justify="flex-end">
@@ -130,11 +218,9 @@ export default function SignUp() {
               </Link>
             </Grid>
           </Grid>
-        </form>
       </div>
-      <Box mt={5}>
-        <Copyright />
-      </Box>
-    </Container>
-  );
+    </Container>);
+  }
 }
+
+export default withStyles(styles)(SignUp);

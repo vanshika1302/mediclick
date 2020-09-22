@@ -27,10 +27,6 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
@@ -39,13 +35,12 @@ const useStyles = makeStyles((theme) => ({
 export default function Login() {
   const classes = useStyles();
 
-  const [loggedIn, setLoggedIn] = useState(false);
   const [isError, setIsError] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('patient');
 
-  const { setAuthTokens } = useAuth();
+  const { authTokens, setAuthTokens } = useAuth();
 
   const postLogin = () => {
     axios.post('/login', {
@@ -55,7 +50,6 @@ export default function Login() {
     }).then(response => {
       if (response.status === 200) {
         setAuthTokens(response.data);
-        setLoggedIn(true);
       } else {
         setIsError(true);
       }
@@ -64,7 +58,7 @@ export default function Login() {
     });
   };
 
-  if (loggedIn) {
+  if (authTokens && authTokens.success) {
     return <Redirect to="/" />;
   }
 

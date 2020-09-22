@@ -37,6 +37,12 @@ app.use('/doctor', doctorRoute);
 import appointmentRoute from './routes/appointment.route.js';
 app.use('/appointment', appointmentRoute);
 
+import hospitalRoute from './routes/hospital.route.js';
+app.use('/hospital', hospitalRoute);
+
+import specialtyRoute from './routes/specialty.route.js';
+app.use('/specialty', specialtyRoute);
+
 import Patient from './models/patient.js';
 import Doctor from './models/doctor.js';
 import Session from './models/session.js';

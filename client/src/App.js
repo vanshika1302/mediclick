@@ -32,7 +32,8 @@ function App() {
       <Router>
         <Switch>
           <Route path='/login' exact component={Login} />
-          <PrivateRoute path='/' exact component={Dashboard} />
+          <Route path='/signup' exact component={SignUp} />
+          <PrivateRoute path='/' component={Dashboard} />
         </Switch>
       </Router>
     </AuthContext.Provider>
