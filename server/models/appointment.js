@@ -18,6 +18,10 @@ const appointmentSchema = new Schema({
     type: String,
     required: true
   },
+  symptoms: {
+    type: String,
+    required: true
+  },
   status: {
     type: String,
     required: true

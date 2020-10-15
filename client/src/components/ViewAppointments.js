@@ -95,14 +95,26 @@ export default class ViewAppointments extends React.Component {
               <Grid item key={appointment._id}>
                 <Card>
                   <CardContent>
+                    {this.props.user.type === 'patient' ?
+                      (<>
+                        <Typography>
+                          {appointment.doctor.firstName} {appointment.doctor.lastName}
+                        </Typography>
+                        <Typography>
+                          {appointment.doctor.hospital.name}
+                        </Typography>
+                      </>) :
+                      (<>
+                        <Typography>
+                          {appointment.patient.firstName} {appointment.patient.lastName}
+                        </Typography>
+                        <Typography>
+                          {appointment.symptoms}
+                        </Typography>
+                      </>)
+                    }
                     <Typography>
-                      {appointment.doctor.firstName} {appointment.doctor.lastName}
-                    </Typography>
-                    <Typography>
-                      {appointment.doctor.hospital.name}
-                    </Typography>
-                    <Typography>
-                      {appointment.slot}
+                      {appointment.date} {appointment.time}
                     </Typography>
                   </CardContent>
                   {appointment.status === 'active' ?

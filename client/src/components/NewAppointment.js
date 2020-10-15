@@ -159,6 +159,7 @@ export default class NewAppointment extends React.Component {
         date: this.state.slotDate,
         time: this.state.slotTime,
         doctorEmail: this.state.doctor,
+        symptoms: this.state.symptoms,
         patientEmail: this.props.user.email,
         status: 'active'
       };
