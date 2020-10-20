@@ -15,10 +15,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { MenuItem, Tab, Tabs } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+
 
 const styles = (theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(14),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -77,6 +80,15 @@ class SignUp extends React.Component {
       allHospitals, allSpecialties} = this.state;
     const {classes} = this.props;
     return (<Container component="main" maxWidth="xs">
+      <div className={classes.root}>
+        <AppBar>
+          <Toolbar>
+            <Typography variant="h2" className={classes.title}>
+              MEDICLICK 
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      </div>
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>

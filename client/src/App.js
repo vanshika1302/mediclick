@@ -5,6 +5,7 @@ import Login from './components/Login';
 import SignUp from './components/Signup';
 import { AuthContext, useAuth } from './auth';
 
+
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const { authTokens } = useAuth();
   return(
