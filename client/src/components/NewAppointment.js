@@ -6,6 +6,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { Breadcrumbs, Button, Card, CardActions, CardContent, MenuItem, Radio, TextField } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 
@@ -108,21 +110,41 @@ function SymptomsForm(props) {
 }
 
 function SlotForm(props) {
-  return <Grid item container justify="center" alignItems="center">
-    <Grid item xs={4}>
-      <TextField
-        id="slot-picker"
-        fullWidth
-        label="Pick a slot"
-        type="datetime-local"
-        InputLabelProps={{
-          shrink: true,
-        }}
-        value={props.value}
-        onChange={event => props.onChange(event.target.value)}
-      />
+  var minDate = new Date();
+  var tomorrow = minDate.getDate() + 1;
+  minDate.setDate(tomorrow);
+  const ALL_SLOTS = [
+    "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "15:00", "15:30", "16:00",
+    "16:30", "17:00", "17:30", "19:00", "19:30", "20:00", "20:30", "21:00"
+  ];
+  const freeSlots = ALL_SLOTS.filter(slot => !props.bookedSlots.includes(slot));
+  return <MuiPickersUtilsProvider utils={DateFnsUtils}>
+    <Grid item container justify="center" alignItems="center">
+      <Grid item xs={3}>
+        <KeyboardDatePicker
+          value={props.date || minDate}
+          onChange={props.onDateChange}
+          minDate={minDate}
+          placeholder="Select Date"
+          format="MM/dd/yyyy"
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <TextField
+          value={props.value}
+          onChange={event => props.onTimeChange(event.target.value)}
+          fullWidth
+          required
+          id="select"
+          name="Select Time"
+          label="Select Time"
+          select
+        >
+          {freeSlots.map(slot => <MenuItem key={slot} value={slot}>{slot}</MenuItem>)}
+        </TextField>
+      </Grid>
     </Grid>
-  </Grid>
+  </MuiPickersUtilsProvider> 
 }
 
 function Confirmation() {
@@ -138,15 +160,19 @@ function Confirmation() {
 export default class NewAppointment extends React.Component {
   constructor(props) {
     super(props);
+    var minDate = new Date();
+    var tomorrow = minDate.getDate() + 1;
+    minDate.setDate(tomorrow);
     this.state = {
       step: 0,
       city: '',
       specialty: '',
       doctor: undefined,
       symptoms: undefined,
-      slotDate: undefined,
+      slotDate: `${minDate.getMonth() + 1}-${minDate.getDate()}-${minDate.getFullYear()}`,
       slotTime: undefined,
-      allDoctors: []
+      allDoctors: [],
+      allAppointments: []
     };
   }
 
@@ -157,16 +183,20 @@ export default class NewAppointment extends React.Component {
     }, (error) => {
       console.log(error);
     });
+    axios.get('/appointment/read').then((response) => {
+      console.log(response.data);
+      this.setState({allAppointments: response.data});
+    }, (error) => {
+      console.log(error);
+    });
   }
 
   setCity = (value) => this.setState({city: value});
   setSpecialty = (value) => this.setState({specialty: value});
   setDoctor = (value) => this.setState({doctor: value});
   setSymptoms = (value) => this.setState({symptoms: value});
-  setSlot = (value) => {
-    const s = value.split('T');
-    this.setState({slotDate: s[0], slotTime: s[1]});
-  };
+  setSlotDate = (value) => this.setState({slotDate: `${value.getMonth() + 1}-${value.getDate()}-${value.getFullYear()}`});
+  setSlotTime = (value) => this.setState({slotTime: value});
 
   handleNext = (stepDetails) => {
     const step = this.state.step;
@@ -200,7 +230,7 @@ export default class NewAppointment extends React.Component {
   };
 
   render() {
-    const { step, city, specialty, doctor, symptoms, slotDate, slotTime, allDoctors } = this.state;
+    const { step, city, specialty, doctor, symptoms, slotDate, slotTime, allDoctors, allAppointments } = this.state;
     const stepDetails = [
       {
         component: CityForm,
@@ -236,8 +266,11 @@ export default class NewAppointment extends React.Component {
       {
         component: SlotForm,
         params: {
-          value: slotDate + 'T' + slotTime,
-          onChange: this.setSlot
+          date: slotDate,
+          value: slotTime,
+          bookedSlots: allAppointments.filter(item => item.doctorEmail === doctor && item.date === slotDate).map(item => item.time),
+          onDateChange: this.setSlotDate,
+          onTimeChange: this.setSlotTime
         }
       },
       {
