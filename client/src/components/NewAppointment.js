@@ -6,6 +6,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { Breadcrumbs, Button, Card, CardActions, CardContent, MenuItem, Radio, TextField } from '@material-ui/core';
+import DateFnsUtils from '@date-io/date-fns';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 
@@ -23,6 +25,25 @@ const useStyles = makeStyles({
   }
 });
 
+function CityForm(props) {
+  return <Grid item container alignItems="center" justify="center">
+    <Grid item xs={5}>
+      <TextField
+        value={props.value}
+        onChange={event => props.onChange(event.target.value)}
+        fullWidth
+        required
+        id="select"
+        name="Select City"
+        label="Select City"
+        select
+      >
+        {props.allCities.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+      </TextField>
+    </Grid>
+  </Grid>;
+}
+
 function SpecialtyForm(props) {
   return <Grid item container alignItems="center" justify="center">
     <Grid item xs={5}>
@@ -36,7 +57,7 @@ function SpecialtyForm(props) {
         label="Select Specialty"
         select
       >
-        {props.allSpecialties.map(item => <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>)}
+        {props.allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
       </TextField>
     </Grid>
   </Grid>;
@@ -89,21 +110,41 @@ function SymptomsForm(props) {
 }
 
 function SlotForm(props) {
-  return <Grid item container justify="center" alignItems="center">
-    <Grid item xs={4}>
-      <TextField
-        id="slot-picker"
-        fullWidth
-        label="Pick a slot"
-        type="datetime-local"
-        InputLabelProps={{
-          shrink: true,
-        }}
-        value={props.value}
-        onChange={event => props.onChange(event.target.value)}
-      />
+  var minDate = new Date();
+  var tomorrow = minDate.getDate() + 1;
+  minDate.setDate(tomorrow);
+  const ALL_SLOTS = [
+    "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "15:00", "15:30", "16:00",
+    "16:30", "17:00", "17:30", "19:00", "19:30", "20:00", "20:30", "21:00"
+  ];
+  const freeSlots = ALL_SLOTS.filter(slot => !props.bookedSlots.includes(slot));
+  return <MuiPickersUtilsProvider utils={DateFnsUtils}>
+    <Grid item container justify="center" alignItems="center">
+      <Grid item xs={3}>
+        <KeyboardDatePicker
+          value={props.date || minDate}
+          onChange={props.onDateChange}
+          minDate={minDate}
+          placeholder="Select Date"
+          format="MM/dd/yyyy"
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <TextField
+          value={props.value}
+          onChange={event => props.onTimeChange(event.target.value)}
+          fullWidth
+          required
+          id="select"
+          name="Select Time"
+          label="Select Time"
+          select
+        >
+          {freeSlots.map(slot => <MenuItem key={slot} value={slot}>{slot}</MenuItem>)}
+        </TextField>
+      </Grid>
     </Grid>
-  </Grid>
+  </MuiPickersUtilsProvider> 
 }
 
 function Confirmation() {
@@ -119,14 +160,19 @@ function Confirmation() {
 export default class NewAppointment extends React.Component {
   constructor(props) {
     super(props);
+    var minDate = new Date();
+    var tomorrow = minDate.getDate() + 1;
+    minDate.setDate(tomorrow);
     this.state = {
       step: 0,
+      city: '',
       specialty: '',
       doctor: undefined,
       symptoms: undefined,
-      slotDate: undefined,
+      slotDate: `${minDate.getMonth() + 1}-${minDate.getDate()}-${minDate.getFullYear()}`,
       slotTime: undefined,
-      allDoctors: []
+      allDoctors: [],
+      allAppointments: []
     };
   }
 
@@ -137,15 +183,20 @@ export default class NewAppointment extends React.Component {
     }, (error) => {
       console.log(error);
     });
+    axios.get('/appointment/read').then((response) => {
+      console.log(response.data);
+      this.setState({allAppointments: response.data});
+    }, (error) => {
+      console.log(error);
+    });
   }
 
+  setCity = (value) => this.setState({city: value});
   setSpecialty = (value) => this.setState({specialty: value});
   setDoctor = (value) => this.setState({doctor: value});
   setSymptoms = (value) => this.setState({symptoms: value});
-  setSlot = (value) => {
-    const s = value.split('T');
-    this.setState({slotDate: s[0], slotTime: s[1]});
-  };
+  setSlotDate = (value) => this.setState({slotDate: `${value.getMonth() + 1}-${value.getDate()}-${value.getFullYear()}`});
+  setSlotTime = (value) => this.setState({slotTime: value});
 
   handleNext = (stepDetails) => {
     const step = this.state.step;
@@ -154,7 +205,7 @@ export default class NewAppointment extends React.Component {
       stepDetails[step].params.value === '') {
       return;
     }
-    if (this.state.step === 3) {
+    if (this.state.step === 4) {
       const booking = {
         date: this.state.slotDate,
         time: this.state.slotTime,
@@ -179,12 +230,20 @@ export default class NewAppointment extends React.Component {
   };
 
   render() {
-    const { step, specialty, doctor, symptoms, slotDate, slotTime, allDoctors } = this.state;
+    const { step, city, specialty, doctor, symptoms, slotDate, slotTime, allDoctors, allAppointments } = this.state;
     const stepDetails = [
+      {
+        component: CityForm,
+        params: {
+          allCities: uniq(allDoctors.map(item => item.hospital.city), false, item => item),
+          value: city,
+          onChange: this.setCity
+        }
+      },
       {
         component: SpecialtyForm,
         params: {
-          allSpecialties: uniq(allDoctors.map(item => item.specialty), false, item => item._id),
+          allSpecialties: uniq(allDoctors.filter(item => item.hospital.city === city).map(item => item.specialty), false, item => item.id),
           value: specialty,
           onChange: this.setSpecialty
         }
@@ -192,7 +251,7 @@ export default class NewAppointment extends React.Component {
       {
         component: DoctorForm,
         params: {
-          allDoctors: allDoctors.filter(item => item.specialty._id === specialty),
+          allDoctors: allDoctors.filter(item => item.specialty.id === specialty && item.hospital.city === city),
           value: doctor,
           onChange: this.setDoctor
         }
@@ -207,8 +266,11 @@ export default class NewAppointment extends React.Component {
       {
         component: SlotForm,
         params: {
-          value: slotDate + 'T' + slotTime,
-          onChange: this.setSlot
+          date: slotDate,
+          value: slotTime,
+          bookedSlots: allAppointments.filter(item => item.doctorEmail === doctor && item.date === slotDate).map(item => item.time),
+          onDateChange: this.setSlotDate,
+          onTimeChange: this.setSlotTime
         }
       },
       {
@@ -227,13 +289,13 @@ export default class NewAppointment extends React.Component {
         </Grid>
         <Grid item>
           <Breadcrumbs separator="">
-            {[1, 2, 3, 4].map(item => {
+            {[1, 2, 3, 4, 5].map(item => {
               return item <= step ? <CheckCircleIcon key={item} /> : <RadioButtonUncheckedIcon key={item} />
             })}
           </Breadcrumbs>
         </Grid>
         {stepDetails.map(item => <item.component {...item.params} />)[step]}
-        {step < 4 ?
+        {step < 5 ?
           <Grid item container justify="center" spacing={10}>
             <Grid item>
               <Button
@@ -251,7 +313,7 @@ export default class NewAppointment extends React.Component {
                 color="primary"
                 onClick={() => this.handleNext(stepDetails)}
               >
-                {step < 3 ? 'Next' : 'Book'}
+                {step < 4 ? 'Next' : 'Book'}
               </Button>
             </Grid>
           </Grid>
@@ -261,4 +323,4 @@ export default class NewAppointment extends React.Component {
     </Paper>;
   }
 };
-  
+
