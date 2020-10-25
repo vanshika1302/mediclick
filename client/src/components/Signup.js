@@ -17,7 +17,8 @@ import { MenuItem, Tab, Tabs } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-
+import signupstyles from '../assets/jss/material-kit-react/views/loginPage';
+import image from "../assets/img/bg7.jpg";
 
 const styles = (theme) => ({
   paper: {
@@ -28,11 +29,21 @@ const styles = (theme) => ({
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: "black",
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
+    backgroundColor: '#1e88e5',
+    color: '#212121',
+    fontFamily: 'Martel',
+    fontWeight: 'fontWeightBold',
   },
+  title: {
+    flexGrow: 1,
+    fontFamily: 'Martel',
+    color: "white",
+  },
+  ...signupstyles
 });
 
 class SignUp extends React.Component {
@@ -79,9 +90,18 @@ class SignUp extends React.Component {
     const {userType, firstName, lastName, email, password, age, phone, city, hospitalId, specialtyId,
       allHospitals, allSpecialties} = this.state;
     const {classes} = this.props;
-    return (<Container component="main" maxWidth="xs">
+    
+    return (<div
+      className={classes.pageHeader}
+      style={{
+        backgroundImage: "url(" + image + ")",
+        backgroundSize: "cover",
+        backgroundPosition: "top center"
+      }}
+    >
+      <Container component="main" maxWidth="xs">
       <div className={classes.root}>
-        <AppBar>
+      <AppBar style={{ background: 'transparent', boxShadow: 'none'  }} >
           <Toolbar>
             <Typography variant="h2" className={classes.title}>
               MEDICLICK 
@@ -89,18 +109,22 @@ class SignUp extends React.Component {
           </Toolbar>
         </AppBar>
       </div>
-      <CssBaseline />
-      <div className={classes.paper}>
+      <CssBaseline/>
+      <div className={classes.container}>
+        <div >
         <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up
-        </Typography>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography style={{color:"white"}} component="h1" variant="h5" >
+            Sign up
+          </Typography>
+
+        </div>
+         
         <Tabs
           value={userType}
           indicatorColor="primary"
-          textColor="primary"
+          textColor="white"
           onChange={(event, value) => this.setState({userType: value})}
         >
           <Tab value="patient" label="Patient" />
@@ -121,8 +145,8 @@ class SignUp extends React.Component {
             : null
             )
           }
-          <Grid item xs={12} sm={6}>
-            <TextField
+          <Grid item xs={12} sm={6} >
+            <TextField 
               autoComplete="fname"
               name="firstName"
               variant="outlined"
@@ -246,7 +270,7 @@ class SignUp extends React.Component {
                 </TextField>
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <TextField 
                   variant="outlined"
                   required value={phone}
                   onChange={event => this.setState({phone: event.target.value})}
@@ -258,18 +282,20 @@ class SignUp extends React.Component {
               </Grid>
             </>}
         </Grid>
-        <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit} onClick={this.postSignup}>
+        <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit} onClick={this.postSignup} style={{color:"white"}}>
           Sign Up
         </Button>
         <Grid container justify="flex-end">
           <Grid item>
-            <Link href="login" variant="body2">
+            <Link href="login" variant="body2" style={{color:"white"}}>
               Already have an account? Sign in
             </Link>
           </Grid>
         </Grid>
       </div>
-    </Container>);
+      
+    </Container>
+    </div>);
   }
 }
 

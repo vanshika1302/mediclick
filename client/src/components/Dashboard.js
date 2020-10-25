@@ -127,7 +127,7 @@ export default function Dashboard(props) {
           <Typography variant="h6" noWrap>
             Welcome {props.user.firstName} {props.user.lastName}
           </Typography>
-          <Button variant="outlined" onClick={handleLogout}>
+          <Button variant="outlined" onClick={handleLogout} justify="flex-end">
             Logout
           </Button>
         </Toolbar>
