@@ -23,6 +23,25 @@ const useStyles = makeStyles({
   }
 });
 
+function CityForm(props) {
+  return <Grid item container alignItems="center" justify="center">
+    <Grid item xs={5}>
+      <TextField
+        value={props.value}
+        onChange={event => props.onChange(event.target.value)}
+        fullWidth
+        required
+        id="select"
+        name="Select City"
+        label="Select City"
+        select
+      >
+        {props.allCities.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+      </TextField>
+    </Grid>
+  </Grid>;
+}
+
 function SpecialtyForm(props) {
   return <Grid item container alignItems="center" justify="center">
     <Grid item xs={5}>
@@ -36,7 +55,7 @@ function SpecialtyForm(props) {
         label="Select Specialty"
         select
       >
-        {props.allSpecialties.map(item => <MenuItem key={item._id} value={item._id}>{item.name}</MenuItem>)}
+        {props.allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
       </TextField>
     </Grid>
   </Grid>;
@@ -121,6 +140,7 @@ export default class NewAppointment extends React.Component {
     super(props);
     this.state = {
       step: 0,
+      city: '',
       specialty: '',
       doctor: undefined,
       symptoms: undefined,
@@ -139,6 +159,7 @@ export default class NewAppointment extends React.Component {
     });
   }
 
+  setCity = (value) => this.setState({city: value});
   setSpecialty = (value) => this.setState({specialty: value});
   setDoctor = (value) => this.setState({doctor: value});
   setSymptoms = (value) => this.setState({symptoms: value});
@@ -154,7 +175,7 @@ export default class NewAppointment extends React.Component {
       stepDetails[step].params.value === '') {
       return;
     }
-    if (this.state.step === 3) {
+    if (this.state.step === 4) {
       const booking = {
         date: this.state.slotDate,
         time: this.state.slotTime,
@@ -179,12 +200,20 @@ export default class NewAppointment extends React.Component {
   };
 
   render() {
-    const { step, specialty, doctor, symptoms, slotDate, slotTime, allDoctors } = this.state;
+    const { step, city, specialty, doctor, symptoms, slotDate, slotTime, allDoctors } = this.state;
     const stepDetails = [
+      {
+        component: CityForm,
+        params: {
+          allCities: uniq(allDoctors.map(item => item.hospital.city), false, item => item),
+          value: city,
+          onChange: this.setCity
+        }
+      },
       {
         component: SpecialtyForm,
         params: {
-          allSpecialties: uniq(allDoctors.map(item => item.specialty), false, item => item._id),
+          allSpecialties: uniq(allDoctors.filter(item => item.hospital.city === city).map(item => item.specialty), false, item => item.id),
           value: specialty,
           onChange: this.setSpecialty
         }
@@ -192,7 +221,7 @@ export default class NewAppointment extends React.Component {
       {
         component: DoctorForm,
         params: {
-          allDoctors: allDoctors.filter(item => item.specialty._id === specialty),
+          allDoctors: allDoctors.filter(item => item.specialty.id === specialty && item.hospital.city === city),
           value: doctor,
           onChange: this.setDoctor
         }
@@ -227,13 +256,13 @@ export default class NewAppointment extends React.Component {
         </Grid>
         <Grid item>
           <Breadcrumbs separator="">
-            {[1, 2, 3, 4].map(item => {
+            {[1, 2, 3, 4, 5].map(item => {
               return item <= step ? <CheckCircleIcon key={item} /> : <RadioButtonUncheckedIcon key={item} />
             })}
           </Breadcrumbs>
         </Grid>
         {stepDetails.map(item => <item.component {...item.params} />)[step]}
-        {step < 4 ?
+        {step < 5 ?
           <Grid item container justify="center" spacing={10}>
             <Grid item>
               <Button
@@ -251,7 +280,7 @@ export default class NewAppointment extends React.Component {
                 color="primary"
                 onClick={() => this.handleNext(stepDetails)}
               >
-                {step < 3 ? 'Next' : 'Book'}
+                {step < 4 ? 'Next' : 'Book'}
               </Button>
             </Grid>
           </Grid>
@@ -261,4 +290,4 @@ export default class NewAppointment extends React.Component {
     </Paper>;
   }
 };
-  
+
