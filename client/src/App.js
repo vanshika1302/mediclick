@@ -3,7 +3,10 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import SignUp from './components/Signup';
+import HomePage from './components/HomePage';
 import { AuthContext, useAuth } from './auth';
+
+
 
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
@@ -14,7 +17,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
       render={(props) => (
         authTokens && authTokens.success ?
           (<Component {...{...props, ...{user: {...authTokens, type: authTokens.userType}}}} />) :
-          (<Redirect to="/login" />)
+          (<Redirect to="/homepage" />)
       )}
     />
   );
@@ -32,6 +35,7 @@ function App() {
     <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
       <Router>
         <Switch>
+          <Route path='/homepage' exact component={HomePage} />
           <Route path='/login' exact component={Login} />
           <Route path='/signup' exact component={SignUp} />
           <PrivateRoute path='/' component={Dashboard} />

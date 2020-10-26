@@ -41,11 +41,13 @@ const useStyles = makeStyles((theme) => ({
   },
   root: {
     display: 'flex' ,
+    
   },
   title: {
     flexGrow: 1,
-    fontFamily: 'Martel',
-    color: "white",
+    fontFamily: 'Open Sans',
+    color: "#212121",
+    fontSize: '4em',
   },
 }));
 
@@ -80,6 +82,7 @@ export default function Login() {
   }
 
   return (
+  
   <div className={classes.pageHeader}
     style={{
       backgroundImage: "url(" + image + ")",
@@ -87,11 +90,12 @@ export default function Login() {
       backgroundPosition: "top center",
       height:"100%" 
     }}>
+      
       <Container component="main" maxWidth="xs">
         <div className={classes.root} >
           <AppBar style={{ background: 'transparent' , boxShadow: 'none' }}  >
             <Toolbar>
-              <Typography variant="h3" className={classes.title} >
+              <Typography variant="h1" className={classes.title} >
                 MEDICLICK 
               </Typography>
             </Toolbar>
@@ -101,7 +105,7 @@ export default function Login() {
           <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5" style={{color:"white"}}>
+          <Typography component="h1" variant="h4" style={{color:"#212121"}}>
             Sign in
           </Typography>
           <TextField            
@@ -132,8 +136,8 @@ export default function Login() {
             autoComplete="current-password"
           />
           <RadioGroup aria-label="usertype" name="usertype" value={userType} onChange={(e) => setUserType(e.currentTarget.value)}>
-            <FormControlLabel value="patient" control={<Radio />} label="Patient" style={{color:"white"}} />
-            <FormControlLabel value="doctor" control={<Radio />} label="Doctor" style={{color:"white"}} />
+            <FormControlLabel value="patient" control={<Radio />} label="Patient" style={{color:"#212121"}} />
+            <FormControlLabel value="doctor" control={<Radio />} label="Doctor" style={{color:"#212121"}} />
           </RadioGroup>
           <Button style={{color:"white"}}
             type="submit"
@@ -157,5 +161,6 @@ export default function Login() {
         <br /><br /><br /><br />
       </Container>
   </div>
+  
   );
 }

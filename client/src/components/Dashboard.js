@@ -17,19 +17,21 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import ViewAppointments from './ViewAppointments';
 import { useAuth } from '../auth';
-import { Button } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
+    
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
+      
     }),
   },
   appBarShift: {
@@ -108,6 +110,7 @@ export default function Dashboard(props) {
     <div className={classes.root}>
       <AppBar
         position="fixed"
+        style={{backgroundColor:"#4dabf5"}}
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
         })}
@@ -123,13 +126,13 @@ export default function Dashboard(props) {
             })}
           >
             <MenuIcon />
-          </IconButton>
+          </IconButton>            
           <Typography variant="h6" noWrap>
             Welcome {props.user.firstName} {props.user.lastName}
-          </Typography>
-          <Button variant="outlined" onClick={handleLogout} justify="flex-end">
-            Logout
-          </Button>
+          </Typography>    
+           <Button variant="outlined" onClick={handleLogout} justify="flex-end">
+              Logout
+            </Button>       
         </Toolbar>
       </AppBar>
       <Drawer

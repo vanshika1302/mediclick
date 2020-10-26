@@ -40,8 +40,9 @@ const styles = (theme) => ({
   },
   title: {
     flexGrow: 1,
-    fontFamily: 'Martel',
-    color: "white",
+    fontFamily: 'Open Sans',
+    color: "#212121",
+    fontSize: '4em',
   },
   ...signupstyles
 });
@@ -92,7 +93,7 @@ class SignUp extends React.Component {
     const {classes} = this.props;
     
     return (<div
-      className={classes.pageHeader}
+      
       style={{
         backgroundImage: "url(" + image + ")",
         backgroundSize: "cover",
@@ -103,7 +104,7 @@ class SignUp extends React.Component {
       <div className={classes.root}>
       <AppBar style={{ background: 'transparent', boxShadow: 'none'  }} >
           <Toolbar>
-            <Typography variant="h2" className={classes.title}>
+            <Typography variant="h1" className={classes.title}>
               MEDICLICK 
             </Typography>
           </Toolbar>
@@ -115,7 +116,7 @@ class SignUp extends React.Component {
         <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography style={{color:"white"}} component="h1" variant="h5" >
+          <Typography style={{color:"#212121"}} component="h1" variant="h4" >
             Sign up
           </Typography>
 
@@ -287,7 +288,7 @@ class SignUp extends React.Component {
         </Button>
         <Grid container justify="flex-end">
           <Grid item>
-            <Link href="login" variant="body2" style={{color:"white"}}>
+            <Link href="login" variant="body2" style={{color:"#212121"}}>
               Already have an account? Sign in
             </Link>
           </Grid>
