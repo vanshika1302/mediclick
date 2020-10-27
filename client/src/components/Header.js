@@ -9,12 +9,13 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Login from './Login';
 import { Link } from "react-router-dom";
+
 const useStyles = makeStyles((theme) => ({
     root: {
         display:'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        height: '82vh',
         
     },
     appbar: {
@@ -79,7 +80,7 @@ export default function Header(){
             GET STARTED           
             <br /> 
             <Button                        
-            style= {{backgroundColor:"#42bff5", color:"white"}}
+            style= {{backgroundColor:"#d90202", color:"white"}}
             size="lg"
             variant="contained"
             href="/login"
@@ -88,13 +89,13 @@ export default function Header(){
             >
             <Link to="/login" style= {{color:"white"}}>
                 CLICK HERE!
-                </Link>
+            </Link>
                 </Button>                    
         
           </Typography>
             </div>
-            </Collapse>
-            
-        </div>
+                </Collapse>
+            </div>
+        
     )
 }
