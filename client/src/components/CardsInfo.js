@@ -6,7 +6,7 @@ import infos from '../components/static/infos';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        minheight:'20vh',
+        minheight:'5vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -19,6 +19,7 @@ export default function () {
         <ImageCard  info={infos[0]}/>
         <ImageCard  info={infos[1]}/>
         <ImageCard  info={infos[2]}/>
+        <ImageCard  info={infos[3]}/>        
         
     </div>
 }

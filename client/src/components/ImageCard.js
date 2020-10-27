@@ -11,17 +11,23 @@ import Collapse from '@material-ui/core/Collapse';
 
 const useStyles = makeStyles({
   root: {
-    maxWidth: 345,
-    maxHeight: 100,
+    height:'50vh',
+    maxWidth: 645,
     margin: '30px',
     backgroundColor: 'rgba(255,255,255,0.5)',
   },
   title: {
        fontFamily: 'roboto',
+       fontWeight: 'bold',
+       fontSize:'2rem', 
   },
   desc: {
     fontFamily: 'roboto',
-  }
+    fontWeight: 'bold',
+  },
+  media: {
+    height: 240,
+  },
 
 });
 
@@ -33,20 +39,34 @@ export default function ImageCard( { info }) {
     }, [])
 
   return (
-    <Collapse in={checked} 
-            {...(checked ? { timeout: 1000 } : {})}
-            collapsedHeight={50}>
+    
     <Card className={classes.root}>
-        <CardContent>
-            
-          <Typography gutterBottom variant="h5" component="h2" className={classes.title}>
+        
+        <CardMedia
+          className={classes.media}
+          image={info.imageUrl}
+          
+        /><CardContent>
+          <Typography gutterBottom variant="h5" component="h1" className={classes.title}>
             { info.title }
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p" className={classes.desc}>
             { info.desc }
           </Typography>
+          <br />
+          <Typography>
+            <Button
+            style= {{backgroundColor:"#22c716", color:"white"}}
+            size="lg"
+            variant="contained"
+            href={info.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            >
+              click me!
+            </Button>
+          </Typography>
         </CardContent>
     </Card>
-    </Collapse>
   );
 }
