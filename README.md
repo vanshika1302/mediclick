@@ -6,6 +6,33 @@ browse doctors by hospital and specialty, and book a time slot; doctors sign
 up with their hospital/specialty and manage the appointments booked with
 them.
 
+## Screenshots
+
+> **Note:** The client normally gets its data from the Express/MongoDB API
+> described below. The screenshots on this page were captured without a
+> live database — the landing/sign-in/sign-up pages are the real production
+> UI, and the dashboard screenshot is the `/demo` route (see
+> [`client/src/components/demo/`](client/src/components/demo)), a
+> screenshot-only path that renders the same components against hardcoded
+> sample doctors and appointments. **All doctor names, appointments, and
+> stats shown below are fictional sample data, not real records.**
+
+**Landing page**
+
+![Mediclick landing page](screenshots/mediclick-landing.png)
+
+**Sign in**
+
+![Mediclick sign-in page](screenshots/mediclick-login.png)
+
+**Doctor dashboard (sample/demo data)**
+
+![Mediclick dashboard with sample doctor data](screenshots/mediclick-dashboard.png)
+
+**Create account**
+
+![Mediclick sign-up page](screenshots/mediclick-signup.png)
+
 ## Architecture
 
 This is a MERN-style app split into two independently run halves:
@@ -69,6 +96,17 @@ npm run build
 
 The build output goes to `client/build/` and can be served by any static
 file host (or Express, if you wire up `express.static`).
+
+#### Previewing the UI without a database
+
+`client/src/components/demo/` adds a single `/demo` route (wired up in
+`App.js`) that renders the dashboard's "find a doctor" / "my appointments"
+views against hardcoded sample data in `demo/demoData.js` instead of calling
+the real API. It doesn't touch `axios` or any production data-fetching
+code, isn't linked from the login/signup flow, and exists purely so the UI
+can be reviewed/screenshotted with `npm start` and no MongoDB running -
+visit `http://localhost:3000/demo` after starting the client. This is how
+the dashboard screenshot above was captured.
 
 ## API route summary
 
