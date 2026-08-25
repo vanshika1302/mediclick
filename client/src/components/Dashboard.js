@@ -1,7 +1,7 @@
 import NewAppointment from './NewAppointment';
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -9,15 +9,19 @@ import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import Avatar from '@material-ui/core/Avatar';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
+import EventAvailableIcon from '@material-ui/icons/EventAvailable';
+import EventNoteIcon from '@material-ui/icons/EventNote';
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import LogoutIcon from '@material-ui/icons/ExitToApp';
 import ViewAppointments from './ViewAppointments';
 import { useAuth } from '../auth';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Box } from '@material-ui/core';
 
 const drawerWidth = 240;
 
@@ -81,18 +85,49 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(4),
+    backgroundColor: theme.palette.background.default,
+    minHeight: '100vh',
+  },
+  brand: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    flexGrow: 1,
+  },
+  brandMark: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spacer: {
+    flexGrow: 1,
+  },
+  userChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1.5),
+    marginRight: theme.spacing(2),
+  },
+  userAvatar: {
+    width: 32,
+    height: 32,
+    backgroundColor: theme.palette.primary.dark,
+    fontSize: '0.9rem',
   },
 }));
 
 export default function Dashboard(props) {
   const classes = useStyles();
-  const theme = useTheme();
   const {setAuthTokens} = useAuth();
 
   const MENU_ITEMS = [
-    {id: 'book_appointment', label: 'New Appointment', patient: true, doctor: false},
-    {id: 'view_appointments', label: 'View Appointments', patient: true, doctor: true}
+    {id: 'book_appointment', label: 'New Appointment', icon: EventAvailableIcon, patient: true, doctor: false},
+    {id: 'view_appointments', label: 'View Appointments', icon: EventNoteIcon, patient: true, doctor: true}
   ];
 
   const [open, setOpen] = useState(false);
@@ -110,7 +145,8 @@ export default function Dashboard(props) {
     <div className={classes.root}>
       <AppBar
         position="fixed"
-        style={{backgroundColor:"#4dabf5"}}
+        color="primary"
+        elevation={0}
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
         })}
@@ -126,13 +162,33 @@ export default function Dashboard(props) {
             })}
           >
             <MenuIcon />
-          </IconButton>            
-          <Typography variant="h6" noWrap>
-            Welcome {props.user.firstName} {props.user.lastName}
-          </Typography>    
-           <Button variant="outlined" onClick={handleLogout} justify="flex-end">
-              Logout
-            </Button>       
+          </IconButton>
+          <div className={classes.brand}>
+            <div className={classes.brandMark}>
+              <LocalHospitalIcon fontSize="small" />
+            </div>
+            <Typography variant="h6" noWrap>
+              Welcome, {props.user.firstName} {props.user.lastName}
+            </Typography>
+          </div>
+          <Box className={classes.userChip}>
+            <Avatar className={classes.userAvatar}>
+              {props.user.firstName ? props.user.firstName[0] : ''}
+              {props.user.lastName ? props.user.lastName[0] : ''}
+            </Avatar>
+            <Typography variant="body2" style={{ textTransform: 'capitalize' }}>
+              {props.user.type}
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            style={{ borderColor: 'rgba(255,255,255,0.5)' }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -155,13 +211,20 @@ export default function Dashboard(props) {
         </div>
         <Divider />
         <List>
-          {MENU_ITEMS.filter(item => item[props.user.type]).map(item => (
-            <ListItem button key={item.id} onClick={() => setSelectedMenu(item.id)}>
-              <ListItemIcon><InboxIcon /></ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItem>
-            
-          ))}
+          {MENU_ITEMS.filter(item => item[props.user.type]).map(item => {
+            const ItemIcon = item.icon;
+            return (
+              <ListItem
+                button
+                key={item.id}
+                selected={selectedMenu === item.id}
+                onClick={() => setSelectedMenu(item.id)}
+              >
+                <ListItemIcon><ItemIcon color={selectedMenu === item.id ? 'primary' : 'inherit'} /></ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItem>
+            );
+          })}
         </List>
       </Drawer>
       <main className={classes.content}>

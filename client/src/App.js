@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import SignUp from './components/Signup';
 import HomePage from './components/HomePage';
+import DemoDashboard from './components/demo/DemoDashboard';
 import { AuthContext, useAuth } from './auth';
+import theme from './theme';
 
 
 
@@ -32,16 +36,27 @@ function App() {
     setAuthTokens(data);
   };
   return (
-    <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
-      <Router>
-        <Switch>
-          <Route path='/homepage' exact component={HomePage} />
-          <Route path='/login' exact component={Login} />
-          <Route path='/signup' exact component={SignUp} />
-          <PrivateRoute path='/' component={Dashboard} />
-        </Switch>
-      </Router>
-    </AuthContext.Provider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
+        <Router>
+          <Switch>
+            <Route path='/homepage' exact component={HomePage} />
+            <Route path='/login' exact component={Login} />
+            <Route path='/signup' exact component={SignUp} />
+            {/*
+              DEMO-ONLY route. Renders the dashboard UI against hardcoded
+              sample data so the product can be previewed/screenshotted
+              without a live MongoDB. It does not call the real API and is
+              not linked from any production auth flow — see
+              components/demo/ for details.
+            */}
+            <Route path='/demo' exact component={DemoDashboard} />
+            <PrivateRoute path='/' component={Dashboard} />
+          </Switch>
+        </Router>
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 }
 

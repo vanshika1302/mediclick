@@ -1,303 +1,343 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import { MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Grid,
+  Link,
+  MenuItem,
+  Paper,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import signupstyles from '../assets/jss/material-kit-react/views/loginPage';
-import image from "../assets/img/bg7.jpg";
+import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import image from '../assets/img/bg7.jpg';
 
-const styles = (theme) => ({
-  paper: {
-    marginTop: theme.spacing(14),
+const useStyles = makeStyles((theme) => ({
+  page: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'stretch'
+  },
+  visualPane: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(6),
+    color: '#FFFFFF',
+    backgroundImage: `linear-gradient(160deg, rgba(10,60,66,0.88) 0%, rgba(14,124,134,0.78) 100%), url(${image})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    [theme.breakpoints.down('sm')]: {
+      display: 'none'
+    }
+  },
+  visualBrand: {
+    display: 'flex',
     alignItems: 'center',
+    gap: theme.spacing(1.25),
+    marginBottom: theme.spacing(3)
+  },
+  formPane: {
+    flexBasis: 560,
+    flexGrow: 0,
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing(4, 0),
+    backgroundColor: theme.palette.background.default,
+    [theme.breakpoints.down('sm')]: {
+      flexBasis: 'auto',
+      flexGrow: 1
+    }
+  },
+  formCard: {
+    padding: theme.spacing(5),
+    width: '100%'
   },
   avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: "black",
+    margin: '0 auto',
+    marginBottom: theme.spacing(2),
+    backgroundColor: theme.palette.primary.main
+  },
+  headingBlock: {
+    textAlign: 'center',
+    marginBottom: theme.spacing(2)
+  },
+  tabs: {
+    marginBottom: theme.spacing(3)
   },
   submit: {
-    margin: theme.spacing(3, 0, 2),
-    backgroundColor: '#1e88e5',
-    color: '#212121',
-    fontFamily: 'Martel',
-    fontWeight: 'fontWeightBold',
-  },
-  title: {
-    flexGrow: 1,
-    fontFamily: 'Open Sans',
-    color: "#212121",
-    fontSize: '4em',
-  },
-  ...signupstyles
-});
-
-class SignUp extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      userType: 'patient',
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      age: 18,
-      phone: '',
-      city: '',
-      hospitalId: '',
-      specialtyId: '',
-      allHospitals: [],
-      allSpecialties: [],
-      success: null
-    }
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(2)
   }
+}));
 
-  componentDidMount() {
+export default function SignUp() {
+  const classes = useStyles();
+
+  const [userType, setUserType] = useState('patient');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [age, setAge] = useState(18);
+  const [phone, setPhone] = useState('');
+  const [city, setCity] = useState('');
+  const [hospitalId, setHospitalId] = useState('');
+  const [specialtyId, setSpecialtyId] = useState('');
+  const [allHospitals, setAllHospitals] = useState([]);
+  const [allSpecialties, setAllSpecialties] = useState([]);
+  const [success, setSuccess] = useState(null);
+
+  React.useEffect(() => {
     axios.get('/hospital/read')
-    .then((response) => this.setState({allHospitals: response.data}), (error) => console.log(error));
+      .then((response) => setAllHospitals(response.data), (error) => console.log(error));
 
     axios.get('/specialty/read')
-    .then((response) => this.setState({allSpecialties: response.data}), (error) => console.log(error));
-  }
+      .then((response) => setAllSpecialties(response.data), (error) => console.log(error));
+  }, []);
 
-  postSignup = () => {
-    axios.put(`/${this.state.userType}/register`, this.state).then(response => {
-      if (response.status === 200) {
-        this.setState({success: true});
-      } else {
-        this.setState({success: false});
-      }
-    }).catch(e => {
-      this.setState({success: false});
+  const postSignup = () => {
+    axios.put(`/${userType}/register`, {
+      userType, firstName, lastName, email, password, age, phone, city, hospitalId, specialtyId
+    }).then(response => {
+      setSuccess(response.status === 200);
+    }).catch(() => {
+      setSuccess(false);
     });
   };
 
-  render() {
-    const {userType, firstName, lastName, email, password, age, phone, city, hospitalId, specialtyId,
-      allHospitals, allSpecialties} = this.state;
-    const {classes} = this.props;
-    
-    return (<div
-      
-      style={{
-        backgroundImage: "url(" + image + ")",
-        backgroundSize: "cover",
-        backgroundPosition: "top center"
-      }}
-    >
-      <Container component="main" maxWidth="xs">
-      <div className={classes.root}>
-      <AppBar style={{ background: 'transparent', boxShadow: 'none'  }} >
-          <Toolbar>
-            <Typography variant="h1" className={classes.title}>
-              MEDICLICK 
-            </Typography>
-          </Toolbar>
-        </AppBar>
-      </div>
-      <CssBaseline/>
-      <div className={classes.container}>
-        <div >
-        <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography style={{color:"#212121"}} component="h1" variant="h4" >
-            Sign up
-          </Typography>
-
+  return (
+    <div className={classes.page}>
+      <div className={classes.visualPane}>
+        <div className={classes.visualBrand}>
+          <LocalHospitalIcon fontSize="large" />
+          <Typography variant="h5" style={{ fontWeight: 700 }}>MEDICLICK</Typography>
         </div>
-         
-        <Tabs
-          value={userType}
-          indicatorColor="primary"
-          textColor="white"
-          onChange={(event, value) => this.setState({userType: value})}
-        >
-          <Tab value="patient" label="Patient" />
-          <Tab value="doctor" label="Doctor" />
-        </Tabs>
-        <br />
-        <Grid container spacing={2}>
-          {this.state.success === false ?
-          <Grid item xs={12}>
-            <Alert severity="error">Error in signup! Please contact support.</Alert>
-          </Grid>
-          : (this.state.success === true ?
-            <Grid item xs={12}>
-              <Alert severity="success">
-                Signup Successful! Please go to <Link href="login">Login page</Link>
-              </Alert>
-            </Grid>
-            : null
-            )
-          }
-          <Grid item xs={12} sm={6} >
-            <TextField 
-              autoComplete="fname"
-              name="firstName"
-              variant="outlined"
-              required
-              value={firstName}
-              onChange={event => this.setState({firstName: event.target.value})}
-              fullWidth
-              id="firstName"
-              label="First Name"
-              autoFocus
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              variant="outlined"
-              required
-              value={lastName}
-              onChange={event => this.setState({lastName: event.target.value})}
-              fullWidth
-              id="lastName"
-              label="Last Name"
-              name="lastName"
-              autoComplete="lname"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              variant="outlined"
-              required
-              value={email}
-              onChange={event => this.setState({email: event.target.value})}
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              variant="outlined"
-              required
-              value={password}
-              onChange={event => this.setState({password: event.target.value})}
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-          </Grid>
-          {userType === 'patient' ? <>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required
-                  value={age}
-                  onChange={event => this.setState({age: event.target.value})}
-                  select
-                  fullWidth
-                  name="age"
-                  label="Age"
-                  id="age"
-                >
-                  {[...Array(101).keys()].slice(1).map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required value={phone}
-                  onChange={event => this.setState({phone: event.target.value})}
-                  fullWidth
-                  name="phone"
-                  label="Phone"
-                  id="phone"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  value={city}
-                  onChange={event => this.setState({city: event.target.value})}
-                  fullWidth
-                  name="city"
-                  label="City"
-                  id="city"
-                />
-              </Grid>
-            </> : <>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required
-                  value={hospitalId}
-                  onChange={event => this.setState({hospitalId: event.target.value})}
-                  select
-                  fullWidth
-                  name="hospital"
-                  label="Hospital"
-                  id="hospital"
-                >
-                  {allHospitals.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required
-                  value={specialtyId}
-                  onChange={event => this.setState({specialtyId: event.target.value})}
-                  select
-                  fullWidth
-                  name="specialty"
-                  label="Specialty"
-                  id="specialty"
-                >
-                  {allSpecialties.map(item => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  variant="outlined"
-                  required value={phone}
-                  onChange={event => this.setState({phone: event.target.value})}
-                  fullWidth
-                  name="phone"
-                  label="Phone"
-                  id="phone"
-                />
-              </Grid>
-            </>}
-        </Grid>
-        <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit} onClick={this.postSignup} style={{color:"white"}}>
-          Sign Up
-        </Button>
-        <Grid container justify="flex-end">
-          <Grid item>
-            <Link href="login" variant="body2" style={{color:"#212121"}}>
-              Already have an account? Sign in
-            </Link>
-          </Grid>
-        </Grid>
+        <Typography variant="h4" style={{ fontWeight: 700, maxWidth: 420 }} gutterBottom>
+          Join a network built around trust.
+        </Typography>
+        <Typography variant="body1" style={{ maxWidth: 380, opacity: 0.9, marginBottom: 32 }}>
+          Whether you&rsquo;re booking a visit or seeing patients, Mediclick keeps
+          everything in one simple place.
+        </Typography>
       </div>
-      
-    </Container>
-    </div>);
-  }
-}
 
-export default withStyles(styles)(SignUp);
+      <div className={classes.formPane}>
+        <Container maxWidth="sm">
+          <Paper elevation={0} className={classes.formCard}>
+            <div className={classes.headingBlock}>
+              <Avatar className={classes.avatar}>
+                <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5" style={{ fontWeight: 700 }}>
+                Create your account
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                It only takes a minute
+              </Typography>
+            </div>
+
+            <Tabs
+              value={userType}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+              onChange={(event, value) => setUserType(value)}
+              className={classes.tabs}
+            >
+              <Tab value="patient" label="I'm a Patient" />
+              <Tab value="doctor" label="I'm a Doctor" />
+            </Tabs>
+
+            {success === false && (
+              <Box mb={2}>
+                <Alert severity="error">Something went wrong during signup. Please try again.</Alert>
+              </Box>
+            )}
+            {success === true && (
+              <Box mb={2}>
+                <Alert severity="success">
+                  Signup successful! Please go to{' '}
+                  <Link component={RouterLink} to="/login">the Login page</Link>.
+                </Alert>
+              </Box>
+            )}
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="fname"
+                  variant="outlined"
+                  required
+                  value={firstName}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  autoFocus
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  variant="outlined"
+                  required
+                  value={lastName}
+                  onChange={(event) => setLastName(event.target.value)}
+                  fullWidth
+                  id="lastName"
+                  label="Last Name"
+                  autoComplete="lname"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  autoComplete="email"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  required
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  fullWidth
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                />
+              </Grid>
+              {userType === 'patient' ? (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={age}
+                      onChange={(event) => setAge(event.target.value)}
+                      select
+                      fullWidth
+                      label="Age"
+                      id="age"
+                    >
+                      {[...Array(101).keys()].slice(1).map((item) => (
+                        <MenuItem key={item} value={item}>{item}</MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      fullWidth
+                      label="Phone"
+                      id="phone"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={city}
+                      onChange={(event) => setCity(event.target.value)}
+                      fullWidth
+                      label="City"
+                      id="city"
+                    />
+                  </Grid>
+                </>
+              ) : (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={hospitalId}
+                      onChange={(event) => setHospitalId(event.target.value)}
+                      select
+                      fullWidth
+                      label="Hospital"
+                      id="hospital"
+                    >
+                      {allHospitals.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={specialtyId}
+                      onChange={(event) => setSpecialtyId(event.target.value)}
+                      select
+                      fullWidth
+                      label="Specialty"
+                      id="specialty"
+                    >
+                      {allSpecialties.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      variant="outlined"
+                      required
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      fullWidth
+                      label="Phone"
+                      id="phone"
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+
+            <Button
+              className={classes.submit}
+              type="submit"
+              fullWidth
+              size="large"
+              variant="contained"
+              color="primary"
+              disableElevation
+              onClick={postSignup}
+            >
+              Sign Up
+            </Button>
+            <Grid container justify="center">
+              <Grid item>
+                <Link component={RouterLink} to="/login" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Container>
+      </div>
+    </div>
+  );
+}

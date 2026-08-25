@@ -5,13 +5,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import { Breadcrumbs, Button, Card, CardActions, CardContent, MenuItem, Radio, TextField } from '@material-ui/core';
+import { Avatar, Box, Breadcrumbs, Button, Card, MenuItem, Radio, TextField } from '@material-ui/core';
 import DateFnsUtils from '@date-io/date-fns';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,
   },
@@ -19,11 +19,30 @@ const useStyles = makeStyles({
     marginBottom: 12,
   },
   card: {
-    marginLeft: 25,
-    marginRight: 25,
-    alignContent: 'center'
-  }
-});
+    width: '100%',
+    maxWidth: 520,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: theme.spacing(1, 1, 1, 2),
+  },
+  cardSelected: {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.lighter,
+  },
+  cardBody: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    backgroundColor: theme.palette.primary.lighter,
+    color: theme.palette.primary.dark,
+    fontWeight: 700,
+  },
+}));
 
 function CityForm(props) {
   return <Grid item container alignItems="center" justify="center">
@@ -64,29 +83,52 @@ function SpecialtyForm(props) {
 }
 
 function DoctorForm(props) {
-  const classes  = useStyles();
-  return <Grid item container direction="column" spacing={3}>
+  const classes = useStyles();
+  if (props.allDoctors.length === 0) {
+    return <Grid item>
+      <Typography color="textSecondary">
+        No doctors match that city and specialty yet. Try going back and choosing another combination.
+      </Typography>
+    </Grid>;
+  }
+  return <Grid item container direction="column" alignItems="center" spacing={2}>
     {
-      props.allDoctors.map(doctor => (
-        <Grid item key={doctor.email}>
-          <Card className={classes.card} variant="outlined">
-            <CardContent>
-              <Typography variant="h5" component="h2">
-                {doctor.firstName} {doctor.lastName}
-              </Typography>
-              <Typography className={classes.pos} color="textSecondary">
-                {doctor.hospital.name}
-              </Typography>
-              <Typography>
-                {doctor.hospital.address}
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Radio size="medium" checked={doctor.email === props.value} onChange={() => props.onChange(doctor.email)}/>
-            </CardActions>
-          </Card>
-        </Grid>
-      ))
+      props.allDoctors.map(doctor => {
+        const selected = doctor.email === props.value;
+        return (
+          <Grid item key={doctor.email}>
+            <Card
+              className={`${classes.card} ${selected ? classes.cardSelected : ''}`}
+              variant="outlined"
+              onClick={() => props.onChange(doctor.email)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={classes.cardBody}>
+                <Avatar className={classes.avatar}>
+                  {doctor.firstName[0]}{doctor.lastName ? doctor.lastName[0] : ''}
+                </Avatar>
+                <div>
+                  <Typography variant="subtitle1" style={{ fontWeight: 600 }}>
+                    Dr. {doctor.firstName} {doctor.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {doctor.hospital.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {doctor.hospital.address}
+                  </Typography>
+                </div>
+              </div>
+              <Radio
+                color="primary"
+                size="medium"
+                checked={selected}
+                onChange={() => props.onChange(doctor.email)}
+              />
+            </Card>
+          </Grid>
+        );
+      })
     }
   </Grid>;
 }
@@ -148,10 +190,18 @@ function SlotForm(props) {
 }
 
 function Confirmation() {
-  return <Grid item container justify="center" alignItems="center">
-    <Grid item xs={8}>
-      <Typography variant="body1">
+  return <Grid item container direction="column" justify="center" alignItems="center" spacing={2}>
+    <Grid item>
+      <CheckCircleIcon color="primary" style={{ fontSize: 56 }} />
+    </Grid>
+    <Grid item>
+      <Typography variant="h5" align="center" style={{ fontWeight: 600 }}>
         Appointment Confirmed!
+      </Typography>
+    </Grid>
+    <Grid item>
+      <Typography variant="body2" color="textSecondary" align="center">
+        We&rsquo;ve saved your booking. You can review it any time under &ldquo;View Appointments&rdquo;.
       </Typography>
     </Grid>
   </Grid>
@@ -280,47 +330,63 @@ export default class NewAppointment extends React.Component {
       }
     ];
 
-    return <Paper elevation={4}>
-      <Grid container direction="column" justify="center" alignItems="center" spacing={4}>
-        <Grid item>
-          <Typography variant="h4">
-            New Appointment
-          </Typography>
-        </Grid>
-        <Grid item>
-          <Breadcrumbs separator="">
-            {[1, 2, 3, 4, 5].map(item => {
-              return item <= step ? <CheckCircleIcon key={item} /> : <RadioButtonUncheckedIcon key={item} />
-            })}
-          </Breadcrumbs>
-        </Grid>
-        {stepDetails.map(item => <item.component {...item.params} />)[step]}
-        {step < 5 ?
-          <Grid item container justify="center" spacing={10}>
+    const STEP_LABELS = ['City', 'Specialty', 'Doctor', 'Symptoms', 'Time Slot'];
+
+    return <Box maxWidth={640} margin="0 auto">
+      <Paper elevation={1} style={{ padding: 40 }}>
+        <Grid container direction="column" justify="center" alignItems="center" spacing={4}>
+          <Grid item container direction="column" alignItems="center" spacing={1}>
             <Grid item>
-              <Button
-                disabled={step===0}
-                variant="contained"
-                color="secondary"
-                onClick={this.handleBack}>
-                Back
-              </Button>
+              <Typography variant="h4" align="center">
+                Book a New Appointment
+              </Typography>
             </Grid>
-            <Grid item>
-              <Button
-                disabled={[undefined, null, ''].includes(stepDetails[step].params.value)}
-                variant="contained"
-                color="primary"
-                onClick={() => this.handleNext(stepDetails)}
-              >
-                {step < 4 ? 'Next' : 'Book'}
-              </Button>
-            </Grid>
+            {step < 5 && (
+              <Grid item>
+                <Typography variant="body2" color="textSecondary">
+                  Step {step + 1} of 5 &middot; {STEP_LABELS[step]}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
-          : null
-        }
-      </Grid>
-    </Paper>;
+          <Grid item>
+            <Breadcrumbs separator="">
+              {[0, 1, 2, 3, 4].map(item => {
+                return item <= step
+                  ? <CheckCircleIcon key={item} color="primary" />
+                  : <RadioButtonUncheckedIcon key={item} color="disabled" />;
+              })}
+            </Breadcrumbs>
+          </Grid>
+          {stepDetails.map(item => <item.component {...item.params} />)[step]}
+          {step < 5 ?
+            <Grid item container justify="center" spacing={4}>
+              <Grid item>
+                <Button
+                  disabled={step===0}
+                  variant="outlined"
+                  color="secondary"
+                  onClick={this.handleBack}>
+                  Back
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button
+                  disabled={[undefined, null, ''].includes(stepDetails[step].params.value)}
+                  variant="contained"
+                  color="primary"
+                  disableElevation
+                  onClick={() => this.handleNext(stepDetails)}
+                >
+                  {step < 4 ? 'Next' : 'Book Appointment'}
+                </Button>
+              </Grid>
+            </Grid>
+            : null
+          }
+        </Grid>
+      </Paper>
+    </Box>;
   }
 };
 
