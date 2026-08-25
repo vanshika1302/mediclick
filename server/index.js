@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 const {connect} = mongoose;
@@ -7,7 +8,8 @@ const {json, urlencoded} = BodyParser;
 import bcrypt from 'bcrypt';
 const port = process.env.PORT || 4000;
 //const cookieParser = require('cookie-parser');
-const mongoURL = 'mongodb://localhost:27017/mediclick';
+// Falls back to the local dev database when MONGO_URL isn't set.
+const mongoURL = process.env.MONGO_URL || 'mongodb://localhost:27017/mediclick';
 
 // Connecting mongoDB Database
 connect(mongoURL, {
