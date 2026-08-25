@@ -1,5 +1,8 @@
 import Mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 const {Schema, model} = Mongoose;
+
+const SALT_ROUNDS = 10;
 
 const hospitalSchema  = new Schema({
   name: {
@@ -90,6 +93,20 @@ doctorSchema.virtual('hospital', {
   localField: 'hospitalId',
   foreignField: 'id',
   justOne: true
+});
+
+// Hash the password before it is persisted, so plaintext never reaches the
+// database. Only re-hashes when the password field actually changed.
+doctorSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  try {
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default model('Doctor', doctorSchema);

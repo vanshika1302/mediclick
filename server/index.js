@@ -4,6 +4,7 @@ const {connect} = mongoose;
 import cors from 'cors';
 import BodyParser from 'body-parser';
 const {json, urlencoded} = BodyParser;
+import bcrypt from 'bcrypt';
 const port = process.env.PORT || 4000;
 //const cookieParser = require('cookie-parser');
 const mongoURL = 'mongodb://localhost:27017/mediclick';
@@ -50,12 +51,16 @@ import Session from './models/session.js';
 app.post('/login', async (req, res) => {
   const Model = req.body.userType === 'patient' ? Patient : Doctor;
   await Model.findOne({email: req.body.email}, async (error, data) => {
-    if (!data) {
+    if (error) {
+      res.json({success: false, message: 'Unable to log in'});
+    } else if (!data) {
       res.json({success: false, message: 'User does not exist!'});
-    } else if (data.password !== req.body.password) {
+    } else if (!(await bcrypt.compare(req.body.password, data.password))) {
       res.json({success: false, message: 'Password incorrect'});
     } else {
-      res.json({success: true, userType: req.body.userType, ...data.toJSON()});
+      // Never send the password hash back to the client.
+      const {password, ...userData} = data.toJSON();
+      res.json({success: true, userType: req.body.userType, ...userData});
       // let cookieValue = await bcrypt.hash("secretword",10);
       // Session.create({cookie: cookieValue, email: req.body.email, userType: req.body.userType}, (error, sessionData) => {
       //   if(error) {

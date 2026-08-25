@@ -1,5 +1,8 @@
 import Mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 const {Schema, model} = Mongoose;
+
+const SALT_ROUNDS = 10;
 
 const patientSchema = new Schema({
   email: {
@@ -32,6 +35,20 @@ const patientSchema = new Schema({
   }
 }, {
     collection: 'patient'
+});
+
+// Hash the password before it is persisted, so plaintext never reaches the
+// database. Only re-hashes when the password field actually changed.
+patientSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  try {
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default model('Patient', patientSchema);
