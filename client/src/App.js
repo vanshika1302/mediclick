@@ -8,6 +8,7 @@ import SignUp from './components/Signup';
 import HomePage from './components/HomePage';
 import DemoDashboard from './components/demo/DemoDashboard';
 import { AuthContext, useAuth } from './auth';
+import { ROUTER_BASENAME } from './config';
 import theme from './theme';
 
 
@@ -39,7 +40,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
-        <Router>
+        <Router basename={ROUTER_BASENAME}>
           <Switch>
             <Route path='/homepage' exact component={HomePage} />
             <Route path='/login' exact component={Login} />
