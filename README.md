@@ -6,6 +6,10 @@ browse doctors by hospital and specialty, and book a time slot; doctors sign
 up with their hospital/specialty and manage the appointments booked with
 them.
 
+**Live static demo:** <https://vanshika1302.github.io/mediclick/> - see the
+[GitHub Pages](#github-pages) section below for what "static demo" means
+here and how the deploy is built.
+
 ## Screenshots
 
 > **Note:** The client normally gets its data from the Express/MongoDB API
@@ -32,6 +36,12 @@ them.
 **Create account**
 
 ![Mediclick sign-up page](screenshots/mediclick-signup.png)
+
+**Live on GitHub Pages** (`https://vanshika1302.github.io/mediclick/demo`,
+served from the `/docs` folder under the `/mediclick/` subpath - see
+[GitHub Pages](#github-pages))
+
+![Mediclick demo dashboard served live from GitHub Pages under the /mediclick/ subpath](screenshots/mediclick-pages-live.png)
 
 ## Architecture
 
@@ -103,10 +113,80 @@ file host (or Express, if you wire up `express.static`).
 `App.js`) that renders the dashboard's "find a doctor" / "my appointments"
 views against hardcoded sample data in `demo/demoData.js` instead of calling
 the real API. It doesn't touch `axios` or any production data-fetching
-code, isn't linked from the login/signup flow, and exists purely so the UI
-can be reviewed/screenshotted with `npm start` and no MongoDB running -
-visit `http://localhost:3000/demo` after starting the client. This is how
-the dashboard screenshot above was captured.
+code, isn't linked from the login/signup flow in development, and exists
+purely so the UI can be reviewed/screenshotted with `npm start` and no
+MongoDB running - visit `http://localhost:3000/demo` after starting the
+client. This is how the dashboard screenshot above was captured.
+
+#### Routing visitors to the demo on a static deploy
+
+The deployed [GitHub Pages](#github-pages) build is served as static files
+with no Express/MongoDB API behind it at all, so the real login/sign-up/
+booking flow can't function there - submitting the login form, for
+instance, would just hang or fail against a URL that doesn't exist. Rather
+than let that be the default experience for a visitor, the production
+build (`npm run build`, which sets `NODE_ENV=production`) additively
+changes two things so people land on something that actually works:
+
+- The landing page's primary call-to-action buttons (`components/Header.js`)
+  point at `/demo` instead of `/signup`, with copy that says so upfront.
+- `/login` and `/signup` show a dismissable-in-spirit (always-visible, not
+  intrusive) banner - `components/DemoBanner.js` - stating plainly that this
+  is a static demo build with no live backend, linking to `/demo`.
+
+This is gated by `client/src/config.js`'s `IS_STATIC_BUILD`
+(`process.env.NODE_ENV === 'production'`), not a hand-set flag: `server/`
+never serves `client/build/` in this repo (no `express.static` wiring), so a
+production client build only ever exists for this static deploy, while
+`npm start` always talks to a real backend through the dev proxy. Local
+development is unaffected either way - the real `axios`-backed code paths
+in `Login.js`, `Signup.js`, `NewAppointment.js`, etc. are untouched; only
+where the CTAs point and whether the banner renders changes.
+`DemoDashboard.js` still renders a `DEMO DATA` badge and an on-screen note
+that the data is sample-only, exactly as before.
+
+## GitHub Pages
+
+The client is deployed as a static site at
+<https://vanshika1302.github.io/mediclick/>, configured as a GitHub Pages
+**project site** serving the `main` branch's `/docs` folder (Settings ->
+Pages -> Source: `Deploy from a branch`, Branch: `main` / `docs`).
+
+Two CRA/react-router details matter for a project site served from a
+subpath instead of a domain root:
+
+- **`client/package.json` sets `"homepage": "."`.** Without it, CRA emits
+  root-absolute asset URLs (`/static/js/...`) that 404 under a subpath like
+  `/mediclick/`; `"."` makes every built asset URL relative instead.
+- **`Router` in `client/src/App.js` gets an explicit `basename`
+  (`/mediclick` in production, via `ROUTER_BASENAME` in
+  `client/src/config.js`).** `homepage: "."` deliberately makes
+  `process.env.PUBLIC_URL` a subpath-agnostic `"."`, which isn't usable as a
+  basename, so it's set separately. Without it, every redirect and
+  `<Link>` navigation resolves against the site root and silently drops the
+  `/mediclick` prefix - which breaks both in-app navigation and the
+  `docs/404.html` fallback below.
+
+**`docs/404.html`** is a copy of `docs/index.html`. This is a static host -
+GitHub Pages can't do server-side rewrites for react-router's client-side
+routes - so a direct hard load of e.g. `/mediclick/demo` 404s at the HTTP
+level. GitHub Pages serves a project's `404.html` for any unmatched path
+under that project, and because it's byte-identical to `index.html`, the
+same React app boots and its router (now with the correct `basename`) takes
+over and renders `/demo` normally.
+
+**Regenerating the deploy:**
+
+```bash
+cd client
+npm run build                 # NODE_ENV=production is set automatically by CRA
+cp -r build/. ../docs/
+cp ../docs/index.html ../docs/404.html
+```
+
+`docs/.nojekyll` (an empty file already committed) tells GitHub Pages not to
+run the build output through Jekyll, which would otherwise ignore/mangle
+files and folders starting with `_`.
 
 ## API route summary
 
