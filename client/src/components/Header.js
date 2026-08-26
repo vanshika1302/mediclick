@@ -4,6 +4,7 @@ import { AppBar, Box, Container, Toolbar, Typography, Button, Chip } from '@mate
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import { Link } from 'react-router-dom';
+import { IS_STATIC_BUILD } from '../config';
 import image from '../assets/img/bg7.jpg';
 
 const useStyles = makeStyles((theme) => ({
@@ -100,6 +101,17 @@ const useStyles = makeStyles((theme) => ({
 export default function Header() {
   const classes = useStyles();
 
+  // No live backend behind the static build (see config.js) - point
+  // visitors straight at the populated, working demo instead of a
+  // sign-up/login flow that can't reach a real API. Local development
+  // (`npm start`, real backend running) is unaffected.
+  const primaryCta = IS_STATIC_BUILD
+    ? { to: '/demo', label: 'View Live Demo' }
+    : { to: '/signup', label: 'Book Your First Appointment' };
+  const navCta = IS_STATIC_BUILD
+    ? { to: '/demo', label: 'View Demo' }
+    : { to: '/signup', label: 'Get Started' };
+
   return (
     <div className={classes.hero}>
       <AppBar position="static" className={classes.appbar} elevation={0}>
@@ -119,12 +131,12 @@ export default function Header() {
               </Button>
               <Button
                 component={Link}
-                to="/signup"
+                to={navCta.to}
                 variant="contained"
                 color="primary"
                 disableElevation
               >
-                Get Started
+                {navCta.label}
               </Button>
             </div>
           </Toolbar>
@@ -135,26 +147,40 @@ export default function Header() {
         <Box>
           <Chip
             icon={<VideocamIcon style={{ color: '#FFFFFF' }} />}
-            label="Online consultations, no waiting rooms"
+            label={
+              IS_STATIC_BUILD
+                ? 'Static demo build — sample data, no live backend'
+                : 'Online consultations, no waiting rooms'
+            }
             style={{ backgroundColor: 'rgba(255,255,255,0.16)', color: '#FFFFFF', marginBottom: 24 }}
           />
           <Typography variant="h2" className={classes.heroTitle}>
             Healthcare that comes to you.
           </Typography>
           <Typography variant="h6" component="p" className={classes.heroSubtitle}>
-            Book trusted doctors near you in minutes, manage appointments in one place,
-            and get the care you need &mdash; safely, from wherever you are.
+            {IS_STATIC_BUILD ? (
+              <>
+                This deployment is a static preview with no live API behind it. Explore
+                the demo dashboard below for a fully populated, working look at the
+                product with sample doctors and appointments.
+              </>
+            ) : (
+              <>
+                Book trusted doctors near you in minutes, manage appointments in one place,
+                and get the care you need &mdash; safely, from wherever you are.
+              </>
+            )}
           </Typography>
           <div className={classes.ctaRow}>
             <Button
               component={Link}
-              to="/signup"
+              to={primaryCta.to}
               size="large"
               variant="contained"
               color="primary"
               disableElevation
             >
-              Book Your First Appointment
+              {primaryCta.label}
             </Button>
             <Button
               component={Link}

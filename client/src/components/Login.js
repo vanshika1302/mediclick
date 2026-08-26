@@ -20,6 +20,7 @@ import { Alert } from '@material-ui/lab';
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { useAuth } from '../auth';
+import DemoBanner from './DemoBanner';
 import image from '../assets/img/bg7.jpg';
 
 const useStyles = makeStyles((theme) => ({
@@ -118,7 +119,9 @@ export default function Login() {
   }
 
   return (
-    <div className={classes.page}>
+    <>
+      <DemoBanner />
+      <div className={classes.page}>
       <div className={classes.visualPane}>
         <div className={classes.visualBrand}>
           <LocalHospitalIcon fontSize="large" />
@@ -212,6 +215,7 @@ export default function Login() {
           </Paper>
         </Container>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
